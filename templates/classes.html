@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Classes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+  </div>
+
+  <div class="nav-links">
+    <a href="/classes">Classes</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/upload">Upload</a>
+    <a href="/teacher">My Materials</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<!-- HERO -->
+<div class="classes-hero">
+  <div class="classes-hero-content">
+    <h1>Choose Your <span>Class</span></h1>
+    <p>Select your grade to explore subjects and study materials.</p>
+  </div>
+</div>
+
+<!-- CARDS -->
+<div class="classes-wrapper">
+  <div class="classes-grid">
+
+    {% for g in [8,9,10,11,12] %}
+    <a href="/grade/{{g}}" class="class-card">
+      <h2>{{g}}</h2>
+      <p>Grade</p>
+      <span class="live">● Live</span>
+    </a>
+    {% endfor %}
+
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Materials</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=7">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+  </div>
+
+  <div class="nav-links">
+    <a href="/classes">Classes</a>
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">Upload</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="card">
+    <h1>My Materials 📄</h1>
+    <p>Manage your uploaded resources</p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <h2>{{ total_materials }}</h2>
+      <p>Total Materials</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>{{ subject_count }}</h2>
+      <p>Subjects</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>{{ grade_count }}</h2>
+      <p>Grades</p>
+    </div>
+
+    <div class="stat-card">
+      <h2>{{ file_type_count }}</h2>
+      <p>File Types</p>
+    </div>
+
+  </div>
+
+  <!-- FILTER -->
+  <div class="filter-bar">
+
+    <input type="text" id="searchInput" placeholder="Search materials...">
+
+    <select id="subjectFilter">
+      <option value="">All Subjects</option>
+      {% for code, name in subjects.items() %}
+        <option value="{{ code }}">{{ name }}</option>
+      {% endfor %}
+    </select>
+
+    <select id="gradeFilter">
+      <option value="">All Grades</option>
+      {% for g in range(8,13) %}
+        <option value="{{ g }}">Grade {{ g }}</option>
+      {% endfor %}
+    </select>
+
+  </div>
+
+  <!-- MATERIALS -->
+  <div class="material-grid">
+
+    {% if materials %}
+    
+      {% for item in materials %}
+      <div class="material-card"
+           data-title="{{ item.title | lower }}"
+           data-subject="{{ item.subject }}"
+           data-grade="{{ item.grade }}">
+
+        <div class="material-icon">
+          {{ get_file_icon(item.filename) }}
+        </div>
+
+        <div class="material-info">
+          <h3>{{ item.title }}</h3>
+          <p>Grade {{ item.grade }} • {{ item.subject }}</p>
+        </div>
+
+        <div class="material-actions">
+          <a href="{{ url_for('static', filename='uploads/' + item.filename) }}" class="download-btn">
+            View
+          </a>
+          <a href="/delete/{{ item.id }}" class="delete-btn">
+            Delete
+          </a>
+        </div>
+
+      </div>
+      {% endfor %}
+
+    {% else %}
+
+      <!-- EMPTY STATE -->
+      <div class="card empty-state">
+        <h3>No materials uploaded yet 📭</h3>
+        <p>Start by uploading your first file</p>
+        <a href="/upload" class="btn">Upload Material</a>
+      </div>
+
+    {% endif %}
+
+  </div>
+
+</div>
+
+<!-- FILTER SCRIPT -->
+<script>
+const searchInput = document.getElementById("searchInput");
+const subjectFilter = document.getElementById("subjectFilter");
+const gradeFilter = document.getElementById("gradeFilter");
+const cards = document.querySelectorAll(".material-card");
+
+function filterMaterials() {
+  const search = searchInput.value.toLowerCase();
+  const subject = subjectFilter.value;
+  const grade = gradeFilter.value;
+
+  cards.forEach(card => {
+    const title = card.dataset.title;
+    const cardSubject = card.dataset.subject;
+    const cardGrade = card.dataset.grade;
+
+    let match = true;
+
+    if (search && !title.includes(search)) match = false;
+    if (subject && cardSubject !== subject) match = false;
+    if (grade && cardGrade !== grade) match = false;
+
+    card.style.display = match ? "flex" : "none";
+  });
+}
+
+searchInput.addEventListener("input", filterMaterials);
+subjectFilter.addEventListener("change", filterMaterials);
+gradeFilter.addEventListener("change", filterMaterials);
+</script>
+
+</body>
+</html>

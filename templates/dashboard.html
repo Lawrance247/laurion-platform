@@ -2,12 +2,84 @@
 <html>
 <head>
     <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=7">
 </head>
 <body>
-    <h1>Welcome, {{ username }} 🎉</h1>
 
-    <p>You are now logged in.</p>
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+  </div>
 
+  <div class="nav-links">
+    <a href="/classes">Classes</a>
+
+    {% if role == "teacher" %}
+      <a href="/teacher">My Materials</a>
+      <a href="/upload">Upload</a>
+    {% endif %}
+
+    <a href="/dashboard">Dashboard</a>
     <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="card">
+    <h1>Hey {{ username }} 👋</h1>
+    <p>
+      {% if role == "teacher" %}
+        Ready to share knowledge today?
+      {% else %}
+        Ready to continue learning?
+      {% endif %}
+    </p>
+  </div>
+
+  <!-- ACTION CARDS -->
+  <div class="stats-grid">
+
+    {% if role == "teacher" %}
+
+      <div class="stat-card">
+        <h2>📤</h2>
+        <p>Upload Material</p>
+        <a href="/upload" class="btn">Upload</a>
+      </div>
+
+      <div class="stat-card">
+        <h2>📁</h2>
+        <p>Manage Files</p>
+        <a href="/teacher" class="btn">View</a>
+      </div>
+
+      <div class="stat-card">
+        <h2>{{ total }}</h2>
+        <p>Your Uploads</p>
+      </div>
+
+    {% else %}
+
+      <div class="stat-card">
+        <h2>📚</h2>
+        <p>Browse Classes</p>
+        <a href="/classes" class="btn">Start</a>
+      </div>
+
+      <div class="stat-card">
+        <h2>🎯</h2>
+        <p>Pick a Subject</p>
+      </div>
+
+    {% endif %}
+
+  </div>
+
+</div>
+
 </body>
 </html>

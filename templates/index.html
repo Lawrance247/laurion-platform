@@ -1,14 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Laurion Platform</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laurion — Smart Learning Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
 </head>
 <body>
-    <h1>Welcome to Laurion 🚀</h1>
 
-    <a href="/register">Register</a><br><br>
-    <a href="/login">Login</a><br><br>
-    <a href="/dashboard">Dashboard</a><br><br>
-    <a href="/logout">Logout</a>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+  </div>
+
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#who">Who it's for</a>
+    <a href="/login" class="btn-outline">Log in</a>
+    <a href="/register" class="btn">Get started →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+
+  <div class="hero-left">
+
+    <div class="badge">SMART LEARNING PLATFORM</div>
+
+    <h1>
+      Study smarter.<br>
+      <span>Achieve more.</span>
+    </h1>
+
+    <p>
+      Quality study materials for grades 8–12, organised by subject
+      and uploaded by real teachers — all in one place.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="/register" class="btn">Start for free →</a>
+      <a href="/login" class="btn-outline">Log in</a>
+    </div>
+
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-circle"></div>
+    <img src="{{ url_for('static', filename='images/logoo.png') }}" class="hero-image">
+
+    <div class="floating icon1">📚</div>
+    <div class="floating icon2">🎓</div>
+  </div>
+
+</section>
+
+<!-- STATS -->
+<section class="section-light">
+  <div class="container stats-row">
+    <div class="stat">
+      <h2>5+</h2>
+      <p>Grades</p>
+    </div>
+    <div class="stat">
+      <h2>20+</h2>
+      <p>Subjects</p>
+    </div>
+    <div class="stat">
+      <h2>100+</h2>
+      <p>Resources</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section-muted" id="how">
+  <div class="container">
+
+    <h2 class="section-title">How it works</h2>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <h3>1. Create account</h3>
+        <p>Sign up as a student or teacher in seconds.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>2. Choose subject</h3>
+        <p>Browse grades and subjects instantly.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>3. Access materials</h3>
+        <p>Download notes, papers, and resources.</p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+
+    <h2 class="section-title">Why Laurion?</h2>
+
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <h3>📚 Organized Content</h3>
+        <p>Everything structured by grade and subject.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>⚡ Fast Uploads</h3>
+        <p>Teachers share instantly with students.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>🎯 Focused Learning</h3>
+        <p>Find exactly what you need quickly.</p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="container">
+    <h2>Start your learning journey today 🚀</h2>
+    <a href="/register" class="btn">Create Account</a>
+  </div>
+</section>
+
 </body>
 </html>

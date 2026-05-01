@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+  </div>
+
+  <div class="nav-links">
+    <a href="/classes">Classes</a>
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">Upload</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="upload-wrapper">
+
+  <!-- LEFT -->
+  <div class="upload-card">
+
+    <h2>Upload Material</h2>
+    <p class="upload-sub">Share knowledge, empower others.</p>
+
+    <form method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
+
+      <!-- TITLE -->
+      <div class="form-group">
+        <label>Title</label>
+        <input type="text" name="title" required>
+      </div>
+
+      <!-- SUBJECT -->
+      <div class="form-group">
+        <label>Subject</label>
+        <select name="subject" required>
+          <option value="">Select subject</option>
+          <option value="math">Mathematics</option>
+          <option value="phy">Physical Science</option>
+          <option value="geo">Geography</option>
+        </select>
+      </div>
+
+      <!-- GRADE -->
+      <div class="form-group">
+        <label>Grade</label>
+        <select name="grade" required>
+          <option value="">Select grade</option>
+          <option value="10">Grade 10</option>
+          <option value="11">Grade 11</option>
+          <option value="12">Grade 12</option>
+        </select>
+      </div>
+
+      <!-- DROP AREA -->
+      <div class="drop-area" id="dropArea">
+        <input type="file" name="file" id="fileInput" hidden required>
+
+        <div class="drop-content">
+          <p><strong>Click or drag file here</strong></p>
+          <span>PDF, DOC, DOCX, PPT (Max 20MB)</span>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div id="filePreview" class="file-preview hidden"></div>
+
+      <!-- PROGRESS -->
+      <div class="progress-bar hidden" id="progressBar">
+        <div class="progress"></div>
+      </div>
+
+      <!-- ERROR -->
+      <div id="errorMsg" class="error-msg hidden"></div>
+
+      <!-- BUTTON -->
+      <button type="submit" class="upload-btn">
+        ⬆ Upload Material
+      </button>
+
+    </form>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="info-box">
+    ⭐ Upload high-quality notes to help students succeed.<br><br>
+    📄 Supported: PDF, DOC, PPT<br>
+    ⚡ Max size: 20MB<br>
+    🚀 Faster uploads = better experience
+  </div>
+
+</div>
+
+<script>
+const dropArea = document.getElementById("dropArea");
+const fileInput = document.getElementById("fileInput");
+const preview = document.getElementById("filePreview");
+const errorMsg = document.getElementById("errorMsg");
+const progressBar = document.getElementById("progressBar");
+const progress = document.querySelector(".progress");
+
+const allowedTypes = ["application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-powerpoint"
+];
+
+const maxSize = 20 * 1024 * 1024; // 20MB
+
+dropArea.onclick = () => fileInput.click();
+
+fileInput.onchange = () => handleFile(fileInput.files[0]);
+
+dropArea.addEventListener("dragover", e => {
+  e.preventDefault();
+  dropArea.classList.add("dragging");
+});
+
+dropArea.addEventListener("dragleave", () => {
+  dropArea.classList.remove("dragging");
+});
+
+dropArea.addEventListener("drop", e => {
+  e.preventDefault();
+  dropArea.classList.remove("dragging");
+  const file = e.dataTransfer.files[0];
+  fileInput.files = e.dataTransfer.files;
+  handleFile(file);
+});
+
+function handleFile(file) {
+  if (!file) return;
+
+  errorMsg.classList.add("hidden");
+
+  if (!allowedTypes.includes(file.type)) {
+    showError("Unsupported file type");
+    return;
+  }
+
+  if (file.size > maxSize) {
+    showError("File too large (max 20MB)");
+    return;
+  }
+
+  preview.classList.remove("hidden");
+  preview.innerHTML = `
+    <div class="preview-card">
+      📄 <strong>${file.name}</strong>
+      <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+    </div>
+  `;
+}
+
+function showError(msg) {
+  errorMsg.innerText = msg;
+  errorMsg.classList.remove("hidden");
+  preview.classList.add("hidden");
+}
+
+document.getElementById("uploadForm").addEventListener("submit", function(e) {
+  progressBar.classList.remove("hidden");
+
+  let width = 0;
+  const interval = setInterval(() => {
+    width += 10;
+    progress.style.width = width + "%";
+
+    if (width >= 100) clearInterval(interval);
+  }, 100);
+});
+</script>
+
+</body>
+</html>

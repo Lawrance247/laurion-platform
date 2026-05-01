@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Grade {{grade}}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+</head>
+<body>
+
+<div class="navbar">
+  <img src="{{ url_for('static', filename='images/logo.png') }}" height="40">
+
+  <div class="nav-links">
+    <a href="/classes">Classes</a>
+
+    {% if session.get("role") == "teacher" %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">Upload</a>
+    {% endif %}
+
+    <a href="/dashboard">Dashboard</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<div style="padding:40px; max-width:1100px; margin:auto;">
+
+  <div class="card">
+
+    <h1>Grade {{grade}}</h1>
+    <p style="color:#666;">Select a subject</p>
+
+    <div class="grid">
+
+    {% for code, name in subjects.items() %}
+    <div class="subject-card"
+        onclick="window.location.href='/subject/{{grade}}/{{code}}'">
+
+        <div class="subject-icon">
+        {{ icons[code] }}
+        </div>
+
+        <h3>{{ name }}</h3>
+
+    </div>
+    {% endfor %}
+
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>

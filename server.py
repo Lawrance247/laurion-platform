@@ -26,8 +26,10 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # 🗄️ Database config
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+if app.config['SQLALCHEMY_DATABASE_URI']:
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace("postgres://", "postgresql://")
 
 # 📁 Upload config
 UPLOAD_FOLDER = "static/uploads"

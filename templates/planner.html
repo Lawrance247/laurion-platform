@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Planner</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+  </div>
+
+  <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/planner">Planner</a>
+    <a href="/classes">Classes</a>
+
+    {% if session.get("role") == "teacher" %}
+      <a href="/teacher">My Materials</a>
+      <a href="/upload">Upload</a>
+    {% endif %}
+
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<div class="planner-wrapper">
+
+  <h1>My Planner 📅</h1>
+
+  <!-- TOGGLE -->
+  <div class="calendar-controls">
+    <button onclick="setView('month')" id="monthBtn" class="active">Month</button>
+    <button onclick="setView('week')" id="weekBtn">Week</button>
+  </div>
+
+  <!-- ADD TASK -->
+  <div class="planner-card">
+    <form method="POST" class="planner-form">
+
+      <input name="title" placeholder="Task title" required>
+      <input name="description" placeholder="Description">
+      <input type="datetime-local" name="date" required>
+
+      <button class="btn">Add Task</button>
+
+    </form>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="calendarContainer" class="calendar month-view">
+
+    {% for day in range(1, 32) %}
+    <div class="calendar-day" onclick="showTasks('{{ day }}')" data-day="{{ day }}">
+      
+      <div class="day-number">{{ day }}</div>
+
+      {% for task in tasks %}
+        {% if "-" + "%02d"|format(day) in task.date %}
+        <div class="calendar-task">
+          {{ task.title }}
+        </div>
+        {% endif %}
+      {% endfor %}
+
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- TASK PANEL -->
+  <div class="task-panel">
+    <h3>Tasks</h3>
+    <div id="taskList">
+      <p>Click a day to view tasks</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- SCRIPT -->
+<script>
+
+// TASK DATA
+const tasks = [
+  {% for task in tasks %}
+  {
+    title: "{{ task.title }}",
+    description: "{{ task.description }}",
+    date: "{{ task.date }}"
+  },
+  {% endfor %}
+];
+
+// TODAY
+const today = new Date();
+const todayDate = today.getDate();
+
+// VIEW TOGGLE
+function setView(view) {
+  const container = document.getElementById("calendarContainer");
+
+  container.classList.remove("month-view", "week-view");
+  container.classList.add(view + "-view");
+
+  document.getElementById("monthBtn").classList.remove("active");
+  document.getElementById("weekBtn").classList.remove("active");
+
+  document.getElementById(view + "Btn").classList.add("active");
+
+  if (view === "week") {
+    showWeek();
+  } else {
+    showMonth();
+  }
+}
+
+// WEEK VIEW
+function showWeek() {
+  const days = document.querySelectorAll(".calendar-day");
+  const current = todayDate;
+
+  const start = current - 3;
+  const end = current + 3;
+
+  days.forEach(day => {
+    const d = parseInt(day.dataset.day);
+
+    if (d >= start && d <= end) {
+      day.style.display = "block";
+    } else {
+      day.style.display = "none";
+    }
+  });
+}
+
+// MONTH VIEW
+function showMonth() {
+  document.querySelectorAll(".calendar-day").forEach(day => {
+    day.style.display = "block";
+  });
+}
+
+// CLICK DAY
+function showTasks(day) {
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+
+  document.querySelectorAll(".calendar-day").forEach(d => {
+    d.classList.remove("active-day");
+  });
+
+  const selected = document.querySelector(`[data-day='${day}']`);
+  selected.classList.add("active-day");
+
+  const filtered = tasks.filter(t =>
+    t.date.includes("-" + day.padStart(2, "0"))
+  );
+
+  if (filtered.length === 0) {
+    list.innerHTML = "<p>No tasks for this day</p>";
+    return;
+  }
+
+  filtered.forEach(task => {
+    list.innerHTML += `
+      <div class="task-item">
+        <h4>${task.title}</h4>
+        <p>${task.description}</p>
+      </div>
+    `;
+  });
+}
+
+// HIGHLIGHT TODAY
+window.onload = () => {
+  const todayEl = document.querySelector(`[data-day='${todayDate}']`);
+  if (todayEl) {
+    todayEl.classList.add("today");
+  }
+};
+
+    if ("Notification" in window) {
+    Notification.requestPermission();
+    }
+
+    setInterval(() => {
+    const now = new Date();
+
+    document.querySelectorAll(".calendar-task").forEach(task => {
+        const text = task.innerText;
+
+        // basic alert simulation
+        if (!task.classList.contains("alerted")) {
+        task.classList.add("alerted");
+
+        if (Notification.permission === "granted") {
+            new Notification("📅 Task Reminder", {
+            body: text
+            });
+        }
+        }
+    });
+    }, 60000);
+
+</script>
+
+</body>
+</html>

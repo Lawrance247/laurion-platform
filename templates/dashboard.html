@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=7">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
 </head>
 <body>
 
@@ -12,39 +14,42 @@
     <img src="{{ url_for('static', filename='images/logo.png') }}">
   </div>
 
+  <button class="nav-toggle"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+
   <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
 
-    {% if role == "teacher" %}
+    {% if session.get("role") == "teacher" %}
       <a href="/teacher">My Materials</a>
       <a href="/upload">Upload</a>
     {% endif %}
 
-    <a href="/dashboard">Dashboard</a>
     <a href="/logout">Logout</a>
   </div>
 </div>
 
-<!-- CONTENT -->
+<!-- MAIN -->
 <div class="container">
 
   <!-- HEADER -->
   <div class="card">
     <h1>Hey {{ username }} 👋</h1>
     <p>
-      {% if role == "teacher" %}
-        Ready to share knowledge today?
+      {% if session.get("role") == "teacher" %}
+        Ready to guide students today?
       {% else %}
-        Ready to continue learning?
+        Ready to level up your learning?
       {% endif %}
     </p>
   </div>
 
-  <!-- ACTION CARDS -->
+  <!-- STATS -->
   <div class="stats-grid">
 
-    {% if role == "teacher" %}
-
+    {% if session.get("role") == "teacher" %}
       <div class="stat-card">
         <h2>📤</h2>
         <p>Upload Material</p>
@@ -57,13 +62,13 @@
         <a href="/teacher" class="btn">View</a>
       </div>
 
+      <!-- 🔥 NEW ANALYTICS -->
       <div class="stat-card">
-        <h2>{{ total }}</h2>
-        <p>Your Uploads</p>
+        <h2>{{ total_downloads }}</h2>
+        <p>Total Downloads</p>
       </div>
 
     {% else %}
-
       <div class="stat-card">
         <h2>📚</h2>
         <p>Browse Classes</p>
@@ -71,15 +76,135 @@
       </div>
 
       <div class="stat-card">
-        <h2>🎯</h2>
-        <p>Pick a Subject</p>
+        <h2>📝</h2>
+        <p>Write Notes</p>
+        <a href="/notes" class="btn">Open</a>
+      </div>
+    {% endif %}
+
+  </div>
+  <div class="card">
+    <h2>🔥 Popular Materials</h2>
+
+    {% if popular_materials %}
+      {% for item in popular_materials %}
+    <div class="material-card">
+      <div class="material-info">
+        <h3>{{ item.title }}</h3>
+        <p>⬇ {{ item.downloads }} downloads</p>
       </div>
 
-    {% endif %}
+      <a href="/download/{{ item.id }}" class="download-btn">View</a>
+    </div>
+    {% endfor %}
+  </div>
+  <!-- QUICK ADD -->
+  <div class="card">
+    <h2>Quick Add Task ⚡</h2>
+
+    <form method="POST" class="planner-form">
+      <input name="title" placeholder="Task title" required>
+      <input name="description" placeholder="Description">
+      <input type="datetime-local" name="date" required>
+      <button class="btn">Add Task</button>
+    </form>
+  </div>
+
+  <!-- TASK GRID -->
+  <div class="dashboard-grid">
+
+    <!-- TODAY -->
+    <div class="card">
+      <h2>Today's Tasks 📅</h2>
+
+      {% if tasks_today %}
+        {% for task in tasks_today %}
+        <div class="task-card today-task" data-time="{{ task.date }}">
+          <strong>{{ task.title }}</strong>
+          <p>{{ task.description }}</p>
+          <span class="task-time">{{ task.date }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <p>No tasks for today 🎉</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- OVERDUE -->
+    <div class="card">
+      <h2>Overdue Tasks 🔴</h2>
+
+      {% if overdue_tasks %}
+        {% for task in overdue_tasks %}
+        <div class="task-card overdue-task">
+          <strong>{{ task.title }}</strong>
+          <p>{{ task.description }}</p>
+          <span class="task-time">{{ task.date }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <p>No overdue tasks ✅</p>
+        </div>
+      {% endif %}
+    </div>
 
   </div>
 
 </div>
+
+<!-- 🔔 NOTIFICATIONS -->
+<script>
+if ("Notification" in window) {
+  Notification.requestPermission();
+}
+
+setInterval(() => {
+  const now = new Date();
+
+  document.querySelectorAll(".today-task").forEach(card => {
+    const taskTime = new Date(card.dataset.time);
+
+    if (
+      Math.abs(taskTime - now) < 10000 &&
+      !card.classList.contains("alerted")
+    ) {
+      card.classList.add("alerted");
+
+      if (Notification.permission === "granted") {
+        new Notification("📅 Task Reminder", {
+          body: card.innerText
+        });
+      }
+    }
+  });
+}, 10000);
+</script>
+
+<!-- MOBILE NAV -->
+<script>
+const navToggle = document.querySelector(".nav-toggle");
+const navLinks = document.querySelector(".nav-links");
+const navOverlay = document.querySelector(".nav-overlay");
+
+if (navToggle) {
+  navToggle.addEventListener("click", () => {
+    navToggle.classList.toggle("open");
+    navLinks.classList.toggle("open");
+    navOverlay.classList.toggle("visible");
+    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+  });
+
+  navOverlay.addEventListener("click", () => {
+    navToggle.classList.remove("open");
+    navLinks.classList.remove("open");
+    navOverlay.classList.remove("visible");
+    document.body.style.overflow = "";
+  });
+}
+</script>
 
 </body>
 </html>

@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Grade {{grade}}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
 </head>
@@ -9,15 +11,18 @@
 <div class="navbar">
   <img src="{{ url_for('static', filename='images/logo.png') }}" height="40">
 
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
   <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
 
     {% if session.get("role") == "teacher" %}
-    <a href="/teacher">My Materials</a>
-    <a href="/upload">Upload</a>
+      <a href="/teacher">My Materials</a>
+      <a href="/upload">Upload</a>
     {% endif %}
 
-    <a href="/dashboard">Dashboard</a>
     <a href="/logout">Logout</a>
   </div>
 </div>
@@ -36,7 +41,7 @@
         onclick="window.location.href='/subject/{{grade}}/{{code}}'">
 
         <div class="subject-icon">
-        {{ icons[code] }}
+        {{ icons[code] if icons else "📘" }}
         </div>
 
         <h3>{{ name }}</h3>
@@ -50,5 +55,24 @@
 
 </div>
 
+<script>
+const navToggle = document.querySelector(".nav-toggle");
+const navLinks = document.querySelector(".nav-links");
+const navOverlay = document.querySelector(".nav-overlay");
+if (navToggle) {
+  navToggle.addEventListener("click", () => {
+    navToggle.classList.toggle("open");
+    navLinks.classList.toggle("open");
+    navOverlay.classList.toggle("visible");
+    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+  });
+  navOverlay.addEventListener("click", () => {
+    navToggle.classList.remove("open");
+    navLinks.classList.remove("open");
+    navOverlay.classList.remove("visible");
+    document.body.style.overflow = "";
+  });
+}
+</script>
 </body>
 </html>

@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, session, flash
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+from datetime import datetime
+from flask import url_for
 import os
 
 # ======================
@@ -12,16 +13,14 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # ======================
-# 🗄️ DATABASE CONFIG (POSTGRESQL)
+# 🗄️ DATABASE CONFIG
 # ======================
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Fix for Render (postgres:// → postgresql://)
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-# Fallback for local testing
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///users.db"
 
@@ -77,6 +76,28 @@ class Material(db.Model):
     grade = db.Column(db.Integer)
     uploaded_by = db.Column(db.String(100))
 
+    downloads = db.Column(db.Integer, default=0)
+
+
+class Planner(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200))
+    description = db.Column(db.String(500))
+    date = db.Column(db.String(50))
+
+    subject = db.Column(db.String(50))
+    material_id = db.Column(db.Integer)
+
+    role = db.Column(db.String(20))
+    user = db.Column(db.String(100))
+
+class Note(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text)
+    subject = db.Column(db.String(50))
+    grade = db.Column(db.Integer)
+    user = db.Column(db.String(100))
+
 # ======================
 # 🏠 ROUTES
 # ======================
@@ -85,53 +106,100 @@ class Material(db.Model):
 def home():
     return render_template("index.html")
 
+@app.route("/download/<int:id>")
+def download(id):
+    material = Material.query.get(id)
+
+    if not material:
+        return "File not found"
+
+    material.downloads += 1
+    db.session.commit()
+
+    return redirect(
+        url_for('static', filename='uploads/' + material.filename)
+    )
+
+@app.route("/teacher")
+def teacher():
+    if "user" not in session:
+        return redirect("/login")
+
+    if session.get("role") != "teacher":
+        return "Access denied 🚫"
+
+    materials = Material.query.filter_by(
+        uploaded_by=session["user"]
+    ).all()
+
+    return render_template(
+        "teacher.html",
+        materials=materials,
+        subjects=SUBJECTS,
+        get_file_icon=get_file_icon
+    )
+
+@app.route("/delete_material/<int:id>")
+def delete_material(id):
+    material = Material.query.get(id)
+    if not material:
+        return "Not found"
+    if material.uploaded_by != session.get("user"):
+        return "Unauthorized 🚫"
+
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], material.filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    db.session.delete(material)
+    db.session.commit()
+
+    return redirect("/teacher")
+
 # ======================
 # 🔐 AUTH
 # ======================
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    error = None
+
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         role = request.form["role"]
 
-        existing_user = User.query.filter_by(username=username).first()
-        if existing_user:
-            return "Username already exists ⚠️"
+        existing = User.query.filter_by(username=username).first()
 
-        hashed_password = generate_password_hash(password)
+        if existing:
+            error = "Username already exists"
+        else:
+            db.session.add(User(username=username, password=password, role=role))
+            db.session.commit()
+            return redirect("/login")
 
-        new_user = User(
-            username=username,
-            password=hashed_password,
-            role=role
-        )
-
-        db.session.add(new_user)
-        db.session.commit()
-
-        return redirect("/login")
-
-    return render_template("register.html")
+    return render_template("register.html", error=error)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    error = None
+
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        user = User.query.filter_by(
+            username=request.form["username"],
+            password=request.form["password"]
+        ).first()
 
-        user = User.query.filter_by(username=username).first()
-
-        if user and check_password_hash(user.password, password):
-            session["user"] = username
+        if user:
+            session["user"] = user.username
             session["role"] = user.role
             return redirect("/dashboard")
+        else:
+            error = "Invalid username or password"
 
-        return "Invalid credentials"
-
-    return render_template("login.html")
+    return render_template("login.html", error=error)
 
 
 @app.route("/logout")
@@ -139,43 +207,61 @@ def logout():
     session.clear()
     return redirect("/")
 
+
 # ======================
-# 📊 DASHBOARD
+# 📊 DASHBOARD (WITH PLANNER)
 # ======================
 
-@app.route("/dashboard")
+@app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     if "user" not in session:
         return redirect("/login")
 
-    role = session.get("role")
-    username = session.get("user")
+    username = session["user"]
+    role = session["role"]
 
-    if role == "teacher":
-        materials = Material.query.filter_by(
-            uploaded_by=username
-        ).order_by(Material.id.desc()).limit(5).all()
-
-        return render_template(
-            "dashboard.html",
+    # ADD TASK FROM DASHBOARD
+    if request.method == "POST":
+        db.session.add(Planner(
+            title=request.form["title"],
+            description=request.form["description"],
+            date=request.form["date"],
             role=role,
-            username=username,
-            total=len(materials),
-            recent_materials=materials
-        )
+            user=username
+        ))
+        db.session.commit()
 
-    else:
-        materials = Material.query.order_by(
-            Material.id.desc()
-        ).limit(5).all()
+    materials = Material.query.order_by(Material.id.desc()).limit(5).all()
 
-        return render_template(
-            "dashboard.html",
-            role=role,
-            username=username,
-            recent_materials=materials,
-            subjects=SUBJECTS
-        )
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    tasks_today = Planner.query.filter(
+        Planner.user == username,
+        Planner.date.contains(today)
+    ).all()
+
+    overdue_tasks = Planner.query.filter(
+        Planner.user == username,
+        Planner.date < today
+    ).all()
+
+    total_downloads = db.session.query(
+        db.func.sum(Material.downloads)
+    ).scalar() or 0
+    popular = Material.query.order_by(
+    Material.downloads.desc()
+    ).limit(5).all()
+    return render_template(
+        "dashboard.html",
+        username=username,
+        role=role,
+        tasks_today=tasks_today,
+        overdue_tasks=overdue_tasks,
+        recent_materials=materials,
+        total_downloads=total_downloads,
+        popular_materials=popular
+    )
+
 
 # ======================
 # 📚 CLASSES
@@ -185,7 +271,6 @@ def dashboard():
 def classes():
     if "user" not in session:
         return redirect("/login")
-
     return render_template("classes.html")
 
 
@@ -207,20 +292,17 @@ def subject(grade, code):
     if "user" not in session:
         return redirect("/login")
 
-    subject_name = SUBJECTS.get(code)
-
-    materials = Material.query.filter_by(
-        subject=code,
-        grade=grade
-    ).all()
+    materials = Material.query.filter_by(subject=code, grade=grade).all()
 
     return render_template(
         "subject.html",
         grade=grade,
-        subject=subject_name,
+        subject=SUBJECTS.get(code),
         materials=materials,
-        get_file_icon=get_file_icon
+        get_file_icon=get_file_icon,
+        code=code
     )
+
 
 # ======================
 # 📁 UPLOAD
@@ -245,23 +327,104 @@ def upload():
             return redirect("/upload")
 
         filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(filepath)
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
-        new_material = Material(
+        db.session.add(Material(
             title=title,
             filename=filename,
             subject=subject,
             grade=int(grade),
             uploaded_by=session["user"]
-        )
+        ))
 
-        db.session.add(new_material)
         db.session.commit()
 
         return redirect(f"/subject/{grade}/{subject}")
 
     return render_template("upload.html")
+
+
+# ======================
+# 📅 PLANNER
+# ======================
+
+@app.route("/planner", methods=["GET", "POST"])
+def planner():
+    if "user" not in session:
+        return redirect("/login")
+
+    if request.method == "POST":
+        db.session.add(Planner(
+            title=request.form["title"],
+            description=request.form["description"],
+            date=request.form["date"],
+            subject=request.form.get("subject"),
+            material_id=request.form.get("material"),
+            role=session["role"],
+            user=session["user"]
+        ))
+        db.session.commit()
+
+    tasks = Planner.query.filter_by(user=session["user"]).all()
+    materials = Material.query.all()
+
+    return render_template(
+        "planner.html",
+        tasks=tasks,
+        materials=materials,
+        subjects=SUBJECTS
+    )
+
+
+@app.route("/delete_task/<int:id>")
+def delete_task(id):
+    task = Planner.query.get(id)
+    db.session.delete(task)
+    db.session.commit()
+    return redirect("/planner")
+
+@app.route("/notes", methods=["GET", "POST"])
+def notes():
+    if "user" not in session:
+        return redirect("/login")
+
+    username = session["user"]
+    subject = request.args.get("subject") or request.form.get("subject") or "math"
+    grade = int(request.args.get("grade") or request.form.get("grade") or 12)
+
+    note = Note.query.filter_by(
+        user=username,
+        subject=subject,
+        grade=grade
+    ).first()
+
+    # SAVE / UPDATE
+    if request.method == "POST":
+        content = request.form["content"]
+        subject = request.form["subject"]
+        grade = int(request.form["grade"])
+
+        if note:
+            note.content = content
+        else:
+            note = Note(
+                content=content,
+                subject=subject,
+                grade=grade,
+                user=username
+            )
+            db.session.add(note)
+
+        db.session.commit()
+
+    content = note.content if note else ""
+
+    return render_template(
+        "notes.html",
+        content=content,
+        subject=subject,
+        grade=grade
+    )
 
 # ======================
 # 🧰 UTIL
@@ -277,13 +440,13 @@ def get_file_icon(filename):
         return "📊"
     return "📁"
 
+
 # ======================
-# 🚀 START APP
+# 🚀 START
 # ======================
 
 with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)

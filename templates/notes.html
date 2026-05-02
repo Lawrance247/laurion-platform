@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Notes</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}">
+  </div>
+
+  <div class="nav-links">
+    <a href="/classes">Classes</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/planner">Planner</a>
+    <a href="/logout">Logout</a>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container notes-container">
+
+  <div class="card">
+    <h1>My Notes 📝</h1>
+    <p>Write, save and download your notes</p>
+
+    <!-- SUBJECT + GRADE -->
+    <form method="GET" class="notes-topbar">
+      <select name="subject">
+        <option value="math" {% if subject=="math" %}selected{% endif %}>Mathematics</option>
+        <option value="phy" {% if subject=="phy" %}selected{% endif %}>Physical Science</option>
+        <option value="geo" {% if subject=="geo" %}selected{% endif %}>Geography</option>
+      </select>
+
+      <select name="grade">
+        {% for g in range(8,13) %}
+        <option value="{{ g }}" {% if grade==g %}selected{% endif %}>Grade {{ g }}</option>
+        {% endfor %}
+      </select>
+
+      <button class="btn">Load</button>
+    </form>
+
+    <!-- NOTES FORM -->
+    <form method="POST">
+
+      <input type="hidden" name="subject" value="{{ subject }}">
+      <input type="hidden" name="grade" value="{{ grade }}">
+
+      <textarea 
+        name="content" 
+        class="notes-textarea" 
+        placeholder="Start writing your notes here...">{{ content }}</textarea>
+
+      <div class="notes-actions">
+        <button class="btn">💾 Save</button>
+
+        <button type="button" class="btn" onclick="downloadPDF()">
+          📄 Download PDF
+        </button>
+
+        <button type="button" class="btn" onclick="downloadTXT()">
+          📥 Download TXT
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<!-- SCRIPTS -->
+<script>
+function getText() {
+  return document.querySelector(".notes-textarea").value;
+}
+
+function downloadPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  const text = getText();
+
+  if (!text.trim()) {
+    alert("Write something first!");
+    return;
+  }
+
+  const lines = doc.splitTextToSize(text, 180);
+
+  doc.setFont("Helvetica");
+  doc.setFontSize(12);
+  doc.text(lines, 10, 15);
+
+  doc.save("notes_" + new Date().getTime() + ".pdf");
+}
+
+function downloadTXT() {
+  const text = getText();
+
+  if (!text.trim()) {
+    alert("Write something first!");
+    return;
+  }
+
+  const blob = new Blob([text], { type: "text/plain" });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "notes.txt";
+  link.click();
+}
+</script>
+
+</body>
+</html>

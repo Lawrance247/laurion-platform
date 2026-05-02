@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{{subject}}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ subject }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
 </head>
 <body>
 
@@ -10,7 +12,12 @@
 <div class="navbar">
   <img src="{{ url_for('static', filename='images/logo.png') }}" height="40">
 
+  <button class="nav-toggle"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+
   <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
 
     {% if session.get("role") == "teacher" %}
@@ -18,7 +25,6 @@
       <a href="/upload">Upload</a>
     {% endif %}
 
-    <a href="/dashboard">Dashboard</a>
     <a href="/logout">Logout</a>
   </div>
 </div>
@@ -28,36 +34,86 @@
 
   <div class="card">
 
-    <h1>Grade {{grade}} — {{subject}}</h1>
-    <p style="color:#666;">Available materials</p>
+    <!-- HEADER -->
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <h1>Grade {{ grade }} — {{ subject }}</h1>
+        <p style="color:#666;">Available materials</p>
+      </div>
 
+      <!-- 📝 NOTES BUTTON -->
+      <a href="/notes?subject={{ code }}&grade={{ grade }}" class="btn">
+        📝 Write Notes
+      </a>
+    </div>
+
+    <!-- MATERIALS -->
     <div class="material-grid">
 
-      {% for item in materials %}
-      <div class="material-card">
+      {% if materials %}
 
-        <div class="material-icon">
-          {{ get_file_icon(item.filename) }}
+        {% for item in materials %}
+        <div class="material-card">
+
+          <div class="material-icon">
+            {{ get_file_icon(item.filename) }}
+          </div>
+
+          <div class="material-info">
+            <h3>{{ item.title }}</h3>
+            <p>Grade {{ item.grade }} • {{ subject }}</p>
+
+            <!-- 🔥 DOWNLOAD COUNT -->
+            <p class="download-count">
+              ⬇ {{ item.downloads }} downloads
+            </p>
+          </div>
+
+          <a href="/download/{{ item.id }}" class="download-btn">
+            Download
+          </a>
+
+        </div>
+        {% endfor %}
+
+      {% else %}
+
+        <!-- EMPTY STATE -->
+        <div class="card empty-state">
+          <h3>No materials yet 📭</h3>
+          <p>Materials for this subject will appear here</p>
         </div>
 
-        <div class="material-info">
-          <h3>{{ item.title }}</h3>
-          <p>Grade {{ item.grade }} • {{ subject }}</p>
-        </div>
-
-        <a href="{{ url_for('static', filename='uploads/' + item.filename) }}"
-           class="download-btn">
-          Download
-        </a>
-
-      </div>
-      {% endfor %}
+      {% endif %}
 
     </div>
 
   </div>
 
 </div>
+
+<!-- NAV SCRIPT -->
+<script>
+const navToggle = document.querySelector(".nav-toggle");
+const navLinks = document.querySelector(".nav-links");
+const navOverlay = document.querySelector(".nav-overlay");
+
+if (navToggle) {
+  navToggle.addEventListener("click", () => {
+    navToggle.classList.toggle("open");
+    navLinks.classList.toggle("open");
+    navOverlay.classList.toggle("visible");
+    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+  });
+
+  navOverlay.addEventListener("click", () => {
+    navToggle.classList.remove("open");
+    navLinks.classList.remove("open");
+    navOverlay.classList.remove("visible");
+    document.body.style.overflow = "";
+  });
+}
+</script>
 
 </body>
 </html>

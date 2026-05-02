@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Upload</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
 </head>
@@ -12,10 +14,18 @@
     <img src="{{ url_for('static', filename='images/logo.png') }}">
   </div>
 
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
   <div class="nav-links">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
-    <a href="/teacher">My Materials</a>
-    <a href="/upload">Upload</a>
+
+    {% if session.get("role") == "teacher" %}
+      <a href="/teacher">My Materials</a>
+      <a href="/upload">Upload</a>
+    {% endif %}
+
     <a href="/logout">Logout</a>
   </div>
 </div>
@@ -179,5 +189,24 @@ document.getElementById("uploadForm").addEventListener("submit", function(e) {
 });
 </script>
 
+<script>
+const navToggle = document.querySelector(".nav-toggle");
+const navLinks = document.querySelector(".nav-links");
+const navOverlay = document.querySelector(".nav-overlay");
+if (navToggle) {
+  navToggle.addEventListener("click", () => {
+    navToggle.classList.toggle("open");
+    navLinks.classList.toggle("open");
+    navOverlay.classList.toggle("visible");
+    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+  });
+  navOverlay.addEventListener("click", () => {
+    navToggle.classList.remove("open");
+    navLinks.classList.remove("open");
+    navOverlay.classList.remove("visible");
+    document.body.style.overflow = "";
+  });
+}
+</script>
 </body>
 </html>

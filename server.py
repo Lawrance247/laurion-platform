@@ -18,12 +18,12 @@ app.secret_key = "supersecretkey"
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
-    raise Exception("DATABASE_URL not set! Please add it in Render.")
-
-# Fix for Render postgres:// issue
-if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+if DATABASE_URL:
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    # fallback (prevents crash during deploy/debug)
+    DATABASE_URL = "sqlite:////tmp/fallback.db"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

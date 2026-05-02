@@ -13,25 +13,24 @@ app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
 # ======================
-# 🗄️ DATABASE CONFIG
+# 🗄️ DATABASE CONFIG (POSTGRESQL ONLY)
 # ======================
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if DATABASE_URL:
-    if DATABASE_URL.startswith("postgres://"):
-        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-else:
-    # fallback (prevents crash)
-    DATABASE_URL = "sqlite:////tmp/database.db"
+if not DATABASE_URL:
+    raise Exception("DATABASE_URL not set! Please add it in Render.")
+
+# Fix for Render postgres:// issue
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
-
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# 🔥 GUARANTEE TABLES EXIST (RENDER SAFE)
+# ✅ CREATE TABLES ON START (SAFE)
 with app.app_context():
     db.create_all()
 
@@ -193,13 +192,10 @@ def login():
     error = None
 
     if request.method == "POST":
-        try:
-            user = User.query.filter_by(
-                username=request.form["username"],
-                password=request.form["password"]
-            ).first()
-        except Exception as e:
-            return f"Database error: {e}"
+        user = User.query.filter_by(
+            username=request.form["username"],
+            password=request.form["password"]
+        ).first()
 
         if user:
             session["user"] = user.username

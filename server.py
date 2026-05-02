@@ -21,8 +21,11 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL:
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+    # 🔥 FORCE SSL (THIS FIXES YOUR ERROR)
+    if "sslmode" not in DATABASE_URL:
+        DATABASE_URL += "?sslmode=require"
 else:
-    # fallback (prevents crash during deploy/debug)
     DATABASE_URL = "sqlite:////tmp/fallback.db"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL

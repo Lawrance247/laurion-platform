@@ -22,19 +22,17 @@ if DATABASE_URL:
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 else:
-    DATABASE_URL = "sqlite:///database.db"
+    # fallback (prevents crash)
+    DATABASE_URL = "sqlite:////tmp/database.db"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
 # 🔥 GUARANTEE TABLES EXIST (RENDER SAFE)
 with app.app_context():
-    db.create_all()
-
-@app.before_request
-def ensure_tables():
     db.create_all()
 
 # ======================

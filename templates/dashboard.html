@@ -62,7 +62,6 @@
         <a href="/teacher" class="btn">View</a>
       </div>
 
-      <!-- 🔥 NEW ANALYTICS -->
       <div class="stat-card">
         <h2>{{ total_downloads }}</h2>
         <p>Total Downloads</p>
@@ -83,22 +82,29 @@
     {% endif %}
 
   </div>
+
+  <!-- POPULAR MATERIALS -->
   <div class="card">
     <h2>🔥 Popular Materials</h2>
 
     {% if popular_materials %}
       {% for item in popular_materials %}
-    <div class="material-card">
-      <div class="material-info">
-        <h3>{{ item.title }}</h3>
-        <p>⬇ {{ item.downloads }} downloads</p>
+        <div class="material-card">
+          <div class="material-info">
+            <h3>{{ item.title }}</h3>
+            <p>⬇ {{ item.downloads }} downloads</p>
+          </div>
+          <a href="/download/{{ item.id }}" class="download-btn">View</a>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <p>No popular materials yet 📭</p>
       </div>
-
-      <a href="/download/{{ item.id }}" class="download-btn">View</a>
-    </div>
-    {% endfor %}
+    {% endif %}
   </div>
-  <!-- QUICK ADD -->
+
+  <!-- QUICK ADD TASK -->
   <div class="card">
     <h2>Quick Add Task ⚡</h2>
 
@@ -119,11 +125,11 @@
 
       {% if tasks_today %}
         {% for task in tasks_today %}
-        <div class="task-card today-task" data-time="{{ task.date }}">
-          <strong>{{ task.title }}</strong>
-          <p>{{ task.description }}</p>
-          <span class="task-time">{{ task.date }}</span>
-        </div>
+          <div class="task-card today-task" data-time="{{ task.date }}">
+            <strong>{{ task.title }}</strong>
+            <p>{{ task.description }}</p>
+            <span class="task-time">{{ task.date }}</span>
+          </div>
         {% endfor %}
       {% else %}
         <div class="empty-state">
@@ -138,11 +144,11 @@
 
       {% if overdue_tasks %}
         {% for task in overdue_tasks %}
-        <div class="task-card overdue-task">
-          <strong>{{ task.title }}</strong>
-          <p>{{ task.description }}</p>
-          <span class="task-time">{{ task.date }}</span>
-        </div>
+          <div class="task-card overdue-task">
+            <strong>{{ task.title }}</strong>
+            <p>{{ task.description }}</p>
+            <span class="task-time">{{ task.date }}</span>
+          </div>
         {% endfor %}
       {% else %}
         <div class="empty-state">
@@ -155,7 +161,7 @@
 
 </div>
 
-<!-- 🔔 NOTIFICATIONS -->
+<!-- NOTIFICATIONS -->
 <script>
 if ("Notification" in window) {
   Notification.requestPermission();

@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, redirect, session, flash
+from flask import Flask, render_template, request, redirect, session, flash, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from flask import url_for
+from sqlalchemy import func
 import os
 
 # ======================
@@ -18,16 +18,24 @@ app.secret_key = "supersecretkey"
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-if not DATABASE_URL:
-    DATABASE_URL = "sqlite:///users.db"
+if DATABASE_URL:
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+else:
+    DATABASE_URL = "sqlite:///database.db"
 
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# 🔥 GUARANTEE TABLES EXIST (RENDER SAFE)
+with app.app_context():
+    db.create_all()
+
+@app.before_request
+def ensure_tables():
+    db.create_all()
 
 # ======================
 # 📁 UPLOAD CONFIG
@@ -75,7 +83,6 @@ class Material(db.Model):
     subject = db.Column(db.String(100))
     grade = db.Column(db.Integer)
     uploaded_by = db.Column(db.String(100))
-
     downloads = db.Column(db.Integer, default=0)
 
 
@@ -84,12 +91,11 @@ class Planner(db.Model):
     title = db.Column(db.String(200))
     description = db.Column(db.String(500))
     date = db.Column(db.String(50))
-
     subject = db.Column(db.String(50))
     material_id = db.Column(db.Integer)
-
     role = db.Column(db.String(20))
     user = db.Column(db.String(100))
+
 
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -106,6 +112,7 @@ class Note(db.Model):
 def home():
     return render_template("index.html")
 
+
 @app.route("/download/<int:id>")
 def download(id):
     material = Material.query.get(id)
@@ -116,9 +123,8 @@ def download(id):
     material.downloads += 1
     db.session.commit()
 
-    return redirect(
-        url_for('static', filename='uploads/' + material.filename)
-    )
+    return redirect(url_for('static', filename='uploads/' + material.filename))
+
 
 @app.route("/teacher")
 def teacher():
@@ -128,9 +134,7 @@ def teacher():
     if session.get("role") != "teacher":
         return "Access denied 🚫"
 
-    materials = Material.query.filter_by(
-        uploaded_by=session["user"]
-    ).all()
+    materials = Material.query.filter_by(uploaded_by=session["user"]).all()
 
     return render_template(
         "teacher.html",
@@ -139,11 +143,14 @@ def teacher():
         get_file_icon=get_file_icon
     )
 
+
 @app.route("/delete_material/<int:id>")
 def delete_material(id):
     material = Material.query.get(id)
+
     if not material:
         return "Not found"
+
     if material.uploaded_by != session.get("user"):
         return "Unauthorized 🚫"
 
@@ -156,6 +163,7 @@ def delete_material(id):
     db.session.commit()
 
     return redirect("/teacher")
+
 
 # ======================
 # 🔐 AUTH
@@ -187,10 +195,13 @@ def login():
     error = None
 
     if request.method == "POST":
-        user = User.query.filter_by(
-            username=request.form["username"],
-            password=request.form["password"]
-        ).first()
+        try:
+            user = User.query.filter_by(
+                username=request.form["username"],
+                password=request.form["password"]
+            ).first()
+        except Exception as e:
+            return f"Database error: {e}"
 
         if user:
             session["user"] = user.username
@@ -209,7 +220,7 @@ def logout():
 
 
 # ======================
-# 📊 DASHBOARD (WITH PLANNER)
+# 📊 DASHBOARD
 # ======================
 
 @app.route("/dashboard", methods=["GET", "POST"])
@@ -220,7 +231,6 @@ def dashboard():
     username = session["user"]
     role = session["role"]
 
-    # ADD TASK FROM DASHBOARD
     if request.method == "POST":
         db.session.add(Planner(
             title=request.form["title"],
@@ -246,11 +256,13 @@ def dashboard():
     ).all()
 
     total_downloads = db.session.query(
-        db.func.sum(Material.downloads)
+        func.sum(Material.downloads)
     ).scalar() or 0
+
     popular = Material.query.order_by(
-    Material.downloads.desc()
+        Material.downloads.desc()
     ).limit(5).all()
+
     return render_template(
         "dashboard.html",
         username=username,
@@ -264,7 +276,7 @@ def dashboard():
 
 
 # ======================
-# 📚 CLASSES
+# 📚 NAVIGATION
 # ======================
 
 @app.route("/classes")
@@ -379,9 +391,18 @@ def planner():
 @app.route("/delete_task/<int:id>")
 def delete_task(id):
     task = Planner.query.get(id)
+
+    if not task:
+        return "Not found"
+
     db.session.delete(task)
     db.session.commit()
     return redirect("/planner")
+
+
+# ======================
+# 📝 NOTES
+# ======================
 
 @app.route("/notes", methods=["GET", "POST"])
 def notes():
@@ -392,39 +413,23 @@ def notes():
     subject = request.args.get("subject") or request.form.get("subject") or "math"
     grade = int(request.args.get("grade") or request.form.get("grade") or 12)
 
-    note = Note.query.filter_by(
-        user=username,
-        subject=subject,
-        grade=grade
-    ).first()
+    note = Note.query.filter_by(user=username, subject=subject, grade=grade).first()
 
-    # SAVE / UPDATE
     if request.method == "POST":
         content = request.form["content"]
-        subject = request.form["subject"]
-        grade = int(request.form["grade"])
 
         if note:
             note.content = content
         else:
-            note = Note(
-                content=content,
-                subject=subject,
-                grade=grade,
-                user=username
-            )
+            note = Note(content=content, subject=subject, grade=grade, user=username)
             db.session.add(note)
 
         db.session.commit()
 
     content = note.content if note else ""
 
-    return render_template(
-        "notes.html",
-        content=content,
-        subject=subject,
-        grade=grade
-    )
+    return render_template("notes.html", content=content, subject=subject, grade=grade)
+
 
 # ======================
 # 🧰 UTIL
@@ -445,8 +450,5 @@ def get_file_icon(filename):
 # 🚀 START
 # ======================
 
-with app.app_context():
-    db.create_all()
-
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

@@ -22,7 +22,7 @@ if DATABASE_URL:
     if DATABASE_URL.startswith("postgres://"):
         DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-    # 🔥 FORCE SSL (THIS FIXES YOUR ERROR)
+    # FORCE SSL (CRITICAL FOR RENDER)
     if "sslmode" not in DATABASE_URL:
         DATABASE_URL += "?sslmode=require"
 else:

@@ -1,119 +1,97 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ subject }}</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+  <title>{{ subject }} — Grade {{ grade }} — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
-  <img src="{{ url_for('static', filename='images/logo.png') }}" height="40">
-
-  <button class="nav-toggle"><span></span><span></span><span></span></button>
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
   <div class="nav-overlay"></div>
-
   <div class="nav-links">
     <a href="/dashboard">Dashboard</a>
-    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
-
-    {% if session.get("role") == "teacher" %}
-      <a href="/teacher">My Materials</a>
-      <a href="/upload">Upload</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload" class="btn btn-sm" style="margin-left:6px;">+ Upload</a>
     {% endif %}
-
     <a href="/logout">Logout</a>
   </div>
-</div>
+</nav>
 
-<!-- CONTENT -->
-<div style="padding:40px; max-width:1100px; margin:auto;">
-
+<div class="container">
+  <div style="margin-bottom:8px;">
+    <a href="/grade/{{ grade }}" style="font-size:13px;color:var(--text-sub);display:inline-flex;align-items:center;gap:5px;">← Back to Grade {{ grade }}</a>
+  </div>
   <div class="card">
-
-    <!-- HEADER -->
-    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:24px;">
       <div>
-        <h1>Grade {{ grade }} — {{ subject }}</h1>
-        <p style="color:#666;">Available materials</p>
+        <div class="badge">Grade {{ grade }}</div>
+        <h1 style="font-size:1.8rem;color:var(--secondary);">{{ subject }}</h1>
+        <p style="color:var(--text-sub);font-size:14px;margin-top:4px;">{{ materials|length }} material{% if materials|length != 1 %}s{% endif %} available</p>
       </div>
-
-      <!-- 📝 NOTES BUTTON -->
-      <a href="/notes?subject={{ code }}&grade={{ grade }}" class="btn">
-        📝 Write Notes
-      </a>
+      <a href="/notes?subject={{ code }}&grade={{ grade }}" class="btn">📝 Write Notes</a>
     </div>
 
-    <!-- MATERIALS -->
     <div class="material-grid">
-
       {% if materials %}
-
         {% for item in materials %}
         <div class="material-card">
-
-          <div class="material-icon">
-            {{ get_file_icon(item.filename) }}
-          </div>
-
+          <div class="material-icon">{{ get_file_icon(item.filename) }}</div>
           <div class="material-info">
             <h3>{{ item.title }}</h3>
-            <p>Grade {{ item.grade }} • {{ subject }}</p>
-
-            <!-- 🔥 DOWNLOAD COUNT -->
-            <p class="download-count">
-              ⬇ {{ item.downloads }} downloads
-            </p>
+            <p>Grade {{ item.grade }} &bull; {{ subject }}</p>
+            <span class="download-count">⬇ {{ item.downloads }} downloads</span>
           </div>
-
-          <a href="/download/{{ item.id }}" class="download-btn">
-            Download
-          </a>
-
+          <a href="/download/{{ item.id }}" class="download-btn">⬇ Download</a>
         </div>
         {% endfor %}
-
       {% else %}
-
-        <!-- EMPTY STATE -->
-        <div class="card empty-state">
-          <h3>No materials yet 📭</h3>
-          <p>Materials for this subject will appear here</p>
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h3>No materials yet</h3>
+          <p>Materials for {{ subject }} Grade {{ grade }} will appear here once uploaded by a teacher.</p>
         </div>
-
       {% endif %}
-
     </div>
-
   </div>
-
 </div>
 
-<!-- NAV SCRIPT -->
+
 <script>
-const navToggle = document.querySelector(".nav-toggle");
-const navLinks = document.querySelector(".nav-links");
-const navOverlay = document.querySelector(".nav-overlay");
-
-if (navToggle) {
-  navToggle.addEventListener("click", () => {
-    navToggle.classList.toggle("open");
-    navLinks.classList.toggle("open");
-    navOverlay.classList.toggle("visible");
-    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+(function(){
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
+  const overlay= document.querySelector('.nav-overlay');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('visible');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
   });
-
-  navOverlay.addEventListener("click", () => {
-    navToggle.classList.remove("open");
-    navLinks.classList.remove("open");
-    navOverlay.classList.remove("visible");
-    document.body.style.overflow = "";
+  overlay.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
   });
-}
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }));
+})();
 </script>
-
 </body>
 </html>

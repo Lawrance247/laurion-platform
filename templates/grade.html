@@ -1,78 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grade {{grade}}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+  <title>Grade {{ grade }} — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body>
 
-<div class="navbar">
-  <img src="{{ url_for('static', filename='images/logo.png') }}" height="40">
-
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
   <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
   <div class="nav-overlay"></div>
   <div class="nav-links">
     <a href="/dashboard">Dashboard</a>
-    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
-
-    {% if session.get("role") == "teacher" %}
-      <a href="/teacher">My Materials</a>
-      <a href="/upload">Upload</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload" class="btn btn-sm" style="margin-left:6px;">+ Upload</a>
     {% endif %}
-
     <a href="/logout">Logout</a>
   </div>
-</div>
+</nav>
 
-<div style="padding:40px; max-width:1100px; margin:auto;">
-
-  <div class="card">
-
-    <h1>Grade {{grade}}</h1>
-    <p style="color:#666;">Select a subject</p>
-
-    <div class="grid">
-
-    {% for code, name in subjects.items() %}
-    <div class="subject-card"
-        onclick="window.location.href='/subject/{{grade}}/{{code}}'">
-
-        <div class="subject-icon">
-        {{ icons[code] if icons else "📘" }}
-        </div>
-
-        <h3>{{ name }}</h3>
-
-    </div>
-    {% endfor %}
-
-    </div>
-
+<div class="container">
+  <div style="margin-bottom:8px;">
+    <a href="/classes" style="font-size:13px;color:var(--text-sub);display:inline-flex;align-items:center;gap:5px;">← Back to Classes</a>
   </div>
-
+  <div class="card">
+    <div class="badge">Grade {{ grade }}</div>
+    <h1 style="font-size:1.8rem;color:var(--secondary);margin-bottom:6px;">Select a Subject</h1>
+    <p style="color:var(--text-sub);font-size:14px;margin-bottom:24px;">Choose a subject to browse available study materials.</p>
+    <div class="grid">
+      {% for code, name in subjects.items() %}
+      <div class="subject-card" onclick="window.location.href='/subject/{{ grade }}/{{ code }}'">
+        <div class="subject-icon">{{ icons[code] if icons else '📘' }}</div>
+        <h3>{{ name }}</h3>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
 </div>
+
 
 <script>
-const navToggle = document.querySelector(".nav-toggle");
-const navLinks = document.querySelector(".nav-links");
-const navOverlay = document.querySelector(".nav-overlay");
-if (navToggle) {
-  navToggle.addEventListener("click", () => {
-    navToggle.classList.toggle("open");
-    navLinks.classList.toggle("open");
-    navOverlay.classList.toggle("visible");
-    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+(function(){
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
+  const overlay= document.querySelector('.nav-overlay');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('visible');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
   });
-  navOverlay.addEventListener("click", () => {
-    navToggle.classList.remove("open");
-    navLinks.classList.remove("open");
-    navOverlay.classList.remove("visible");
-    document.body.style.overflow = "";
+  overlay.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
   });
-}
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }));
+})();
 </script>
 </body>
 </html>

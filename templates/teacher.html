@@ -1,151 +1,117 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Materials</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=8">
+  <title>My Materials — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
+<nav class="navbar">
   <div class="nav-logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
   </div>
-
-  <button class="nav-toggle"><span></span><span></span><span></span></button>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
   <div class="nav-overlay"></div>
-
   <div class="nav-links">
     <a href="/dashboard">Dashboard</a>
-    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
-
-    {% if role == "teacher" %}
-      <a href="/teacher">My Materials</a>
-      <a href="/upload">Upload</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload" class="btn btn-sm" style="margin-left:6px;">+ Upload</a>
     {% endif %}
-
     <a href="/logout">Logout</a>
   </div>
-</div>
+</nav>
 
-<!-- CONTENT -->
 <div class="container">
 
-  <!-- HEADER -->
-  <div class="card">
-    <h1>My Materials 📄</h1>
-    <p>Manage your uploaded resources</p>
+  <div class="dash-header" style="margin-bottom:28px;">
+    <div>
+      <h1>My Materials 📄</h1>
+      <p>Manage and track your uploaded resources</p>
+    </div>
+    <a href="/upload" class="btn">+ Upload New</a>
   </div>
 
   <!-- STATS -->
   <div class="stats-grid">
-
     <div class="stat-card">
-      <h2>{{ total_materials }}</h2>
-      <p>Total Materials</p>
+      <div class="stat-icon">📁</div>
+      <h2>{{ materials|length }}</h2>
+      <p>Total materials</p>
     </div>
-
     <div class="stat-card">
-      <h2>{{ subject_count }}</h2>
-      <p>Subjects</p>
+      <div class="stat-icon">📚</div>
+      <h2>{{ materials|map(attribute='subject')|unique|list|length }}</h2>
+      <p>Subjects covered</p>
     </div>
-
     <div class="stat-card">
-      <h2>{{ grade_count }}</h2>
-      <p>Grades</p>
+      <div class="stat-icon">🎓</div>
+      <h2>{{ materials|map(attribute='grade')|unique|list|length }}</h2>
+      <p>Grades covered</p>
     </div>
-
     <div class="stat-card">
-      <h2>{{ file_type_count }}</h2>
-      <p>File Types</p>
+      <div class="stat-icon">⬇️</div>
+      <h2>{{ materials|sum(attribute='downloads') }}</h2>
+      <p>Total downloads</p>
     </div>
-
   </div>
 
-  <!-- FILTER -->
+  <!-- FILTER BAR -->
   <div class="filter-bar">
-
-    <input type="text" id="searchInput" placeholder="Search materials...">
-
+    <input type="text" id="searchInput" placeholder="🔍  Search materials...">
     <select id="subjectFilter">
       <option value="">All Subjects</option>
       {% for code, name in subjects.items() %}
-        <option value="{{ code }}">{{ name }}</option>
+      <option value="{{ code }}">{{ name }}</option>
       {% endfor %}
     </select>
-
     <select id="gradeFilter">
       <option value="">All Grades</option>
       {% for g in range(8,13) %}
-        <option value="{{ g }}">Grade {{ g }}</option>
+      <option value="{{ g }}">Grade {{ g }}</option>
       {% endfor %}
     </select>
-
   </div>
 
   <!-- MATERIALS -->
   <div class="material-grid">
-
     {% if materials %}
-    
       {% for item in materials %}
       <div class="material-card"
            data-title="{{ item.title | lower }}"
            data-subject="{{ item.subject }}"
            data-grade="{{ item.grade }}">
-
-        <!-- ICON -->
-        <div class="material-icon">
-          {{ get_file_icon(item.filename) }}
-        </div>
-
-        <!-- INFO -->
+        <div class="material-icon">{{ get_file_icon(item.filename) }}</div>
         <div class="material-info">
           <h3>{{ item.title }}</h3>
-          <p>Grade {{ item.grade }} • {{ item.subject }}</p>
-
-          <!-- 🔥 DOWNLOAD COUNT -->
-          <p class="download-count">⬇ {{ item.downloads }} downloads</p>
+          <p>Grade {{ item.grade }} &bull; {{ subjects.get(item.subject, item.subject) }}</p>
+          <span class="download-count">⬇ {{ item.downloads }} downloads</span>
         </div>
-
-        <!-- ACTIONS -->
         <div class="material-actions">
-
-          <!-- 🔥 TRACKED DOWNLOAD -->
-          <a href="/download/{{ item.id }}" class="download-btn">
-            View
-          </a>
-
-          <!-- 🗑 DELETE -->
-          <a href="/delete_material/{{ item.id }}"
-             class="delete-btn"
-             onclick="return confirm('Delete this material?')">
-            Delete
-          </a>
-
+          <a href="/download/{{ item.id }}" class="download-btn">View</a>
+          <a href="/delete_material/{{ item.id }}" class="delete-btn"
+             onclick="return confirm('Delete &quot;{{ item.title }}&quot;? This cannot be undone.')">🗑 Delete</a>
         </div>
-
       </div>
       {% endfor %}
-
     {% else %}
-
-      <div class="card empty-state">
-        <h3>No materials uploaded yet 📭</h3>
-        <p>Start by uploading your first file</p>
-        <a href="/upload" class="btn">Upload Material</a>
+      <div class="empty-state" style="padding:60px 24px;">
+        <div class="empty-icon">📭</div>
+        <h3>No materials uploaded yet</h3>
+        <p>Start by uploading your first resource for students.</p>
+        <a href="/upload" class="btn" style="margin-top:4px;">Upload Material</a>
       </div>
-
     {% endif %}
-
   </div>
 
 </div>
 
-<!-- FILTER SCRIPT -->
 <script>
 const searchInput = document.getElementById("searchInput");
 const subjectFilter = document.getElementById("subjectFilter");
@@ -156,49 +122,46 @@ function filterMaterials() {
   const search = searchInput.value.toLowerCase();
   const subject = subjectFilter.value;
   const grade = gradeFilter.value;
-
+  let visible = 0;
   cards.forEach(card => {
-    const title = card.dataset.title;
-    const cardSubject = card.dataset.subject;
-    const cardGrade = card.dataset.grade;
-
-    let match = true;
-
-    if (search && !title.includes(search)) match = false;
-    if (subject && cardSubject !== subject) match = false;
-    if (grade && cardGrade !== grade) match = false;
-
+    const match =
+      (!search || card.dataset.title.includes(search)) &&
+      (!subject || card.dataset.subject === subject) &&
+      (!grade || card.dataset.grade === grade);
     card.style.display = match ? "flex" : "none";
+    if(match) visible++;
   });
 }
-
 searchInput.addEventListener("input", filterMaterials);
 subjectFilter.addEventListener("change", filterMaterials);
 gradeFilter.addEventListener("change", filterMaterials);
 </script>
 
-<!-- NAV TOGGLE -->
 <script>
-const navToggle = document.querySelector(".nav-toggle");
-const navLinks = document.querySelector(".nav-links");
-const navOverlay = document.querySelector(".nav-overlay");
-
-if (navToggle) {
-  navToggle.addEventListener("click", () => {
-    navToggle.classList.toggle("open");
-    navLinks.classList.toggle("open");
-    navOverlay.classList.toggle("visible");
-    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+(function(){
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
+  const overlay= document.querySelector('.nav-overlay');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('visible');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
   });
-
-  navOverlay.addEventListener("click", () => {
-    navToggle.classList.remove("open");
-    navLinks.classList.remove("open");
-    navOverlay.classList.remove("visible");
-    document.body.style.overflow = "";
+  overlay.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
   });
-}
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }));
+})();
 </script>
-
 </body>
 </html>

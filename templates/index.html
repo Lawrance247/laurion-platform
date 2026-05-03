@@ -4,16 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laurion — Smart Learning Platform</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=10">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body>
 
-<!-- NAVBAR -->
 <nav class="navbar">
   <div class="nav-logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion">
   </div>
-
   <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
   <div class="nav-overlay"></div>
   <div class="nav-links">
@@ -27,173 +26,154 @@
 
 <!-- HERO -->
 <section class="hero">
-
   <div class="hero-left">
-
-    <div class="badge">SMART LEARNING PLATFORM</div>
-
-    <h1>
-      Study smarter.<br>
-      <span>Achieve more.</span>
-    </h1>
-
-    <p>
-      Quality study materials for grades 8–12, organised by subject
-      and uploaded by real teachers — all in one place.
-    </p>
-
+    <div class="badge">✦ Smart Learning Platform</div>
+    <h1>Study smarter.<br><span>Achieve more.</span></h1>
+    <p>Quality study materials for grades 8–12, organised by subject and uploaded by real teachers — all in one place.</p>
     <div class="hero-buttons">
       <a href="/register" class="btn">Start for free →</a>
       <a href="/login" class="btn-outline">Log in</a>
     </div>
-
   </div>
-
   <div class="hero-right">
     <div class="hero-circle"></div>
-    <img src="{{ url_for('static', filename='images/logoo.png') }}" class="hero-image">
-
+    <img src="{{ url_for('static', filename='images/logoo.png') }}" class="hero-image" alt="Laurion">
     <div class="floating icon1">📚</div>
     <div class="floating icon2">🎓</div>
   </div>
-
 </section>
 
 <!-- STATS -->
 <section class="section-light">
   <div class="container stats-row">
-    <div class="stat">
-      <h2>5+</h2>
-      <p>Grades</p>
-    </div>
-    <div class="stat">
-      <h2>20+</h2>
-      <p>Subjects</p>
-    </div>
-    <div class="stat">
-      <h2>100+</h2>
-      <p>Resources</p>
-    </div>
+    <div class="stat"><h2>5+</h2><p>Grades Covered</p></div>
+    <div class="stat"><h2>5+</h2><p>Subjects</p></div>
+    <div class="stat"><h2>100%</h2><p>Free to Use</p></div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
 <section class="section-muted" id="how">
   <div class="container">
-
     <h2 class="section-title">How it works</h2>
-
     <div class="features-grid">
-
       <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">👤</div>
         <h3>1. Create account</h3>
-        <p>Sign up as a student or teacher in seconds.</p>
+        <p>Sign up as a student or teacher in seconds. No credit card needed — always free.</p>
       </div>
-
       <div class="feature-card">
-        <h3>2. Choose subject</h3>
-        <p>Browse grades and subjects instantly.</p>
+        <div style="font-size:2rem;margin-bottom:14px;">📂</div>
+        <h3>2. Choose your subject</h3>
+        <p>Browse by grade and subject. Find exactly what you need without the noise.</p>
       </div>
-
       <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">⬇️</div>
         <h3>3. Access materials</h3>
-        <p>Download notes, papers, and resources.</p>
+        <p>Download notes, past papers, and resources uploaded by your teachers instantly.</p>
       </div>
-
     </div>
-
   </div>
 </section>
 
 <!-- FEATURES -->
 <section id="features">
   <div class="container">
-
     <h2 class="section-title">Why Laurion?</h2>
-
     <div class="features-grid">
-
       <div class="feature-card">
-        <h3>📚 Organized Content</h3>
-        <p>Everything structured by grade and subject.</p>
+        <div style="font-size:2rem;margin-bottom:14px;">📚</div>
+        <h3>Organised Content</h3>
+        <p>Everything structured by grade and subject so you always know where to look.</p>
       </div>
-
       <div class="feature-card">
-        <h3>⚡ Fast Uploads</h3>
-        <p>Teachers share instantly with students.</p>
+        <div style="font-size:2rem;margin-bottom:14px;">📅</div>
+        <h3>Built-in Planner</h3>
+        <p>Create tasks, set deadlines, and get notified — all without leaving the platform.</p>
       </div>
-
       <div class="feature-card">
-        <h3>🎯 Focused Learning</h3>
-        <p>Find exactly what you need quickly.</p>
+        <div style="font-size:2rem;margin-bottom:14px;">📝</div>
+        <h3>Smart Notes</h3>
+        <p>Write notes linked to your subject and grade, then export as PDF or TXT anytime.</p>
       </div>
-
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">⚡</div>
+        <h3>Fast Uploads</h3>
+        <p>Teachers share materials instantly with drag-and-drop upload and live tracking.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">📊</div>
+        <h3>Download Insights</h3>
+        <p>Teachers see which resources are most used, so they know what students need most.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">🔒</div>
+        <h3>Secure & Private</h3>
+        <p>Role-based access ensures students and teachers see only what's relevant to them.</p>
+      </div>
     </div>
-
   </div>
 </section>
 
+<!-- WHO -->
 <section id="who" class="section-light">
   <div class="container">
-
     <h2 class="section-title">Who uses Laurion</h2>
-
     <div class="features-grid">
-
       <div class="feature-card">
-        <h3>🎓 Students</h3>
-        <p>Access organized study materials and improve your performance.</p>
+        <div style="font-size:2rem;margin-bottom:14px;">🎓</div>
+        <h3>Students</h3>
+        <p>Access organised study materials, manage your tasks, and write notes — all in one focused space.</p>
       </div>
-
       <div class="feature-card">
-        <h3>👨‍🏫 Teachers</h3>
-        <p>Upload and share resources easily with your students.</p>
+        <div style="font-size:2rem;margin-bottom:14px;">👨‍🏫</div>
+        <h3>Teachers</h3>
+        <p>Upload resources, manage your materials, and track exactly how many students download each file.</p>
       </div>
-
       <div class="feature-card">
-        <h3>📈 Self-learners</h3>
-        <p>Take control of your learning journey anytime, anywhere.</p>
+        <div style="font-size:2rem;margin-bottom:14px;">📈</div>
+        <h3>Self-learners</h3>
+        <p>Take full control of your learning journey anytime, anywhere — no classroom required.</p>
       </div>
-
     </div>
-
   </div>
 </section>
+
 <!-- CTA -->
 <section class="cta">
   <div class="container">
     <h2>Start your learning journey today 🚀</h2>
-    <a href="/register" class="btn">Create Account</a>
+    <p style="color:rgba(255,255,255,0.65);font-size:16px;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">Join thousands of students and teachers already using Laurion.</p>
+    <a href="/register" class="btn" style="padding:14px 36px;font-size:16px;">Create Free Account →</a>
   </div>
 </section>
 
+
 <script>
-const navToggle = document.querySelector(".nav-toggle");
-const navLinks = document.querySelector(".nav-links");
-const navOverlay = document.querySelector(".nav-overlay");
-if (navToggle) {
-  navToggle.addEventListener("click", () => {
-    navToggle.classList.toggle("open");
-    navLinks.classList.toggle("open");
-    navOverlay.classList.toggle("visible");
-    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+(function(){
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
+  const overlay= document.querySelector('.nav-overlay');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('visible');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
   });
-  navOverlay.addEventListener("click", () => {
-    navToggle.classList.remove("open");
-    navLinks.classList.remove("open");
-    navOverlay.classList.remove("visible");
-    document.body.style.overflow = "";
+  overlay.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
   });
-  // Close menu on anchor link click
-  navLinks.querySelectorAll("a").forEach(a => {
-    a.addEventListener("click", () => {
-      navToggle.classList.remove("open");
-      navLinks.classList.remove("open");
-      navOverlay.classList.remove("visible");
-      document.body.style.overflow = "";
-    });
-  });
-}
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }));
+})();
 </script>
 </body>
 </html>

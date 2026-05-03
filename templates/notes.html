@@ -1,124 +1,186 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Notes</title>
-
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <title>My Notes — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
+<nav class="navbar">
   <div class="nav-logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
   </div>
-
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
   <div class="nav-links">
-    <a href="/classes">Classes</a>
     <a href="/dashboard">Dashboard</a>
+    <a href="/classes">Classes</a>
     <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload" class="btn btn-sm" style="margin-left:6px;">+ Upload</a>
+    {% endif %}
     <a href="/logout">Logout</a>
   </div>
-</div>
+</nav>
 
-<!-- MAIN -->
 <div class="container notes-container">
-
   <div class="card">
-    <h1>My Notes 📝</h1>
-    <p>Write, save and download your notes</p>
+
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:24px;">
+      <div>
+        <div class="badge">📝 Notes</div>
+        <h1 style="font-size:1.8rem;color:var(--secondary);">My Notes</h1>
+        <p style="color:var(--text-sub);font-size:14px;margin-top:4px;">Write, save, and export notes for any subject and grade.</p>
+      </div>
+      <div style="font-size:13px;color:var(--muted);background:var(--bg-subtle);padding:8px 14px;border-radius:10px;border:1px solid var(--border);">
+        Auto-saved per subject &amp; grade
+      </div>
+    </div>
 
     <!-- SUBJECT + GRADE -->
     <form method="GET" class="notes-topbar">
       <select name="subject">
-        <option value="math" {% if subject=="math" %}selected{% endif %}>Mathematics</option>
-        <option value="phy" {% if subject=="phy" %}selected{% endif %}>Physical Science</option>
-        <option value="geo" {% if subject=="geo" %}selected{% endif %}>Geography</option>
+        <option value="math"  {% if subject=="math"  %}selected{% endif %}>📊 Mathematics</option>
+        <option value="phy"   {% if subject=="phy"   %}selected{% endif %}>⚛️ Physical Science</option>
+        <option value="ls"    {% if subject=="ls"    %}selected{% endif %}>🌿 Life Science</option>
+        <option value="geo"   {% if subject=="geo"   %}selected{% endif %}>🌍 Geography</option>
+        <option value="acc"   {% if subject=="acc"   %}selected{% endif %}>📈 Accounting</option>
       </select>
-
       <select name="grade">
         {% for g in range(8,13) %}
         <option value="{{ g }}" {% if grade==g %}selected{% endif %}>Grade {{ g }}</option>
         {% endfor %}
       </select>
-
-      <button class="btn">Load</button>
+      <button class="btn">Load Notes</button>
     </form>
+
+    <!-- WORD COUNT -->
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px;" id="wordCount">0 words</div>
 
     <!-- NOTES FORM -->
     <form method="POST">
-
       <input type="hidden" name="subject" value="{{ subject }}">
       <input type="hidden" name="grade" value="{{ grade }}">
-
-      <textarea 
-        name="content" 
-        class="notes-textarea" 
-        placeholder="Start writing your notes here...">{{ content }}</textarea>
-
+      <textarea name="content" class="notes-textarea"
+        id="notesArea"
+        placeholder="Start writing your notes here... Use this space to summarise what you've learned.">{{ content }}</textarea>
       <div class="notes-actions">
-        <button class="btn">💾 Save</button>
-
-        <button type="button" class="btn" onclick="downloadPDF()">
-          📄 Download PDF
-        </button>
-
-        <button type="button" class="btn" onclick="downloadTXT()">
-          📥 Download TXT
-        </button>
+        <button class="btn">💾 Save Notes</button>
+        <button type="button" class="btn" onclick="downloadPDF()" style="background:var(--secondary);">📄 Export PDF</button>
+        <button type="button" class="btn" onclick="downloadTXT()" style="background:var(--secondary);">📥 Export TXT</button>
+        <button type="button" class="btn" onclick="clearNotes()" style="background:transparent;color:var(--text);border:1.5px solid var(--border);box-shadow:none;">🗑 Clear</button>
       </div>
-
     </form>
-  </div>
 
+  </div>
 </div>
 
-<!-- SCRIPTS -->
+<div class="toast-container" id="toastContainer"></div>
+
 <script>
-function getText() {
-  return document.querySelector(".notes-textarea").value;
+const notesArea = document.getElementById("notesArea");
+const wordCount  = document.getElementById("wordCount");
+
+function updateWordCount() {
+  const words = notesArea.value.trim().split(/\s+/).filter(w => w).length;
+  const chars = notesArea.value.length;
+  wordCount.textContent = `${words} word${words!==1?'s':''} · ${chars} character${chars!==1?'s':''}`;
 }
+notesArea.addEventListener("input", updateWordCount);
+updateWordCount();
+
+function showToast(msg, type='success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type==='success'?'✅':'❌') + ' ' + msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function getText() { return notesArea.value; }
 
 function downloadPDF() {
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
   const text = getText();
-
-  if (!text.trim()) {
-    alert("Write something first!");
-    return;
-  }
-
-  const lines = doc.splitTextToSize(text, 180);
-
-  doc.setFont("Helvetica");
+  if (!text.trim()) { showToast('Write something first!','error'); return; }
+  const doc = new jsPDF();
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(16);
+  doc.text("Laurion Notes", 10, 15);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(10);
+  doc.setTextColor(120);
+  doc.text("Subject: {{ subject }} | Grade: {{ grade }} | " + new Date().toLocaleDateString(), 10, 22);
+  doc.setTextColor(0);
   doc.setFontSize(12);
-  doc.text(lines, 10, 15);
-
-  doc.save("notes_" + new Date().getTime() + ".pdf");
+  const lines = doc.splitTextToSize(text, 180);
+  doc.text(lines, 10, 32);
+  doc.save("laurion_notes_{{ subject }}_grade{{ grade }}_" + Date.now() + ".pdf");
+  showToast('PDF downloaded successfully!');
 }
 
 function downloadTXT() {
   const text = getText();
-
-  if (!text.trim()) {
-    alert("Write something first!");
-    return;
-  }
-
-  const blob = new Blob([text], { type: "text/plain" });
-
+  if (!text.trim()) { showToast('Write something first!','error'); return; }
+  const blob = new Blob(["Laurion Notes\nSubject: {{ subject }} | Grade: {{ grade }}\n" + new Date().toLocaleDateString() + "\n\n" + text], {type:"text/plain"});
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "notes.txt";
+  link.download = "laurion_notes_{{ subject }}_grade{{ grade }}.txt";
   link.click();
+  showToast('TXT file downloaded!');
 }
+
+function clearNotes() {
+  if (!confirm('Clear all notes? This will not delete saved notes — only clears the editor.')) return;
+  notesArea.value = '';
+  updateWordCount();
+}
+
+// Auto-save indicator
+let saveTimer;
+notesArea.addEventListener("input", () => {
+  clearTimeout(saveTimer);
+  wordCount.style.color = 'var(--gold)';
+  wordCount.textContent = '● Unsaved changes · ' + notesArea.value.trim().split(/\s+/).filter(w=>w).length + ' words';
+  saveTimer = setTimeout(() => {
+    updateWordCount();
+    wordCount.style.color = 'var(--muted)';
+  }, 2000);
+});
 </script>
 
+<script>
+(function(){
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
+  const overlay= document.querySelector('.nav-overlay');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('visible');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
+  });
+  overlay.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  });
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }));
+})();
+</script>
 </body>
 </html>

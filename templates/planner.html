@@ -1,211 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Planner</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planner — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
+<nav class="navbar">
   <div class="nav-logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
   </div>
-
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
   <div class="nav-links">
     <a href="/dashboard">Dashboard</a>
-    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
-
-    {% if session.get("role") == "teacher" %}
-      <a href="/teacher">My Materials</a>
-      <a href="/upload">Upload</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload" class="btn btn-sm" style="margin-left:6px;">+ Upload</a>
     {% endif %}
-
     <a href="/logout">Logout</a>
   </div>
-</div>
+</nav>
 
 <div class="planner-wrapper">
 
-  <h1>My Planner 📅</h1>
-
-  <!-- TOGGLE -->
-  <div class="calendar-controls">
-    <button onclick="setView('month')" id="monthBtn" class="active">Month</button>
-    <button onclick="setView('week')" id="weekBtn">Week</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+    <h1>My Planner 📅</h1>
+    <div class="calendar-controls">
+      <button onclick="setView('month')" id="monthBtn" class="active">Month</button>
+      <button onclick="setView('week')"  id="weekBtn">Week</button>
+    </div>
   </div>
 
   <!-- ADD TASK -->
   <div class="planner-card">
-    <form method="POST" class="planner-form">
-
-      <input name="title" placeholder="Task title" required>
-      <input name="description" placeholder="Description">
-      <input type="datetime-local" name="date" required>
-
-      <button class="btn">Add Task</button>
-
+    <h3 style="font-size:1rem;color:var(--text-sub);margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Add a Task</h3>
+    <form method="POST" style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;">
+      <div>
+        <input name="title" placeholder="Task title" required>
+      </div>
+      <div>
+        <input name="description" placeholder="Description (optional)">
+      </div>
+      <div>
+        <input type="datetime-local" name="date" required>
+      </div>
+      <button class="btn">+ Add</button>
     </form>
   </div>
 
   <!-- CALENDAR -->
   <div id="calendarContainer" class="calendar month-view">
-
     {% for day in range(1, 32) %}
     <div class="calendar-day" onclick="showTasks('{{ day }}')" data-day="{{ day }}">
-      
       <div class="day-number">{{ day }}</div>
-
       {% for task in tasks %}
         {% if "-" + "%02d"|format(day) in task.date %}
-        <div class="calendar-task">
-          {{ task.title }}
-        </div>
+        <div class="calendar-task">{{ task.title }}</div>
         {% endif %}
       {% endfor %}
-
     </div>
     {% endfor %}
-
   </div>
 
   <!-- TASK PANEL -->
   <div class="task-panel">
-    <h3>Tasks</h3>
-    <div id="taskList">
-      <p>Click a day to view tasks</p>
+    <h3>Tasks for selected day</h3>
+    <div id="taskList"><p style="color:var(--muted);font-size:14px;">Click a day to view tasks</p></div>
+  </div>
+
+  <!-- FULL TASK LIST -->
+  <div class="card" style="margin-top:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2>All Tasks</h2>
+      <span style="font-size:13px;color:var(--muted);">{{ tasks|length }} task{% if tasks|length != 1 %}s{% endif %}</span>
     </div>
+    {% if tasks %}
+      {% for task in tasks %}
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg-subtle);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:10px;transition:var(--transition);">
+        <div style="flex:1;">
+          <div style="font-size:14.5px;font-weight:600;color:var(--text);">{{ task.title }}</div>
+          {% if task.description %}<div style="font-size:13px;color:var(--text-sub);margin-top:2px;">{{ task.description }}</div>{% endif %}
+          <span class="task-time">{{ task.date }}</span>
+        </div>
+        <a href="/delete_task/{{ task.id }}" class="delete-btn btn-sm"
+           onclick="return confirm('Delete this task?')">🗑</a>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:32px 0;">
+        <div class="empty-icon">📋</div>
+        <p>No tasks yet. Add one above!</p>
+      </div>
+    {% endif %}
   </div>
 
 </div>
 
-<!-- SCRIPT -->
 <script>
-
-// TASK DATA
 const tasks = [
   {% for task in tasks %}
-  {
-    title: "{{ task.title }}",
-    description: "{{ task.description }}",
-    date: "{{ task.date }}"
-  },
+  { title: {{ task.title|tojson }}, description: {{ task.description|tojson }}, date: {{ task.date|tojson }}, id: {{ task.id }} },
   {% endfor %}
 ];
 
-// TODAY
 const today = new Date();
 const todayDate = today.getDate();
 
-// VIEW TOGGLE
 function setView(view) {
   const container = document.getElementById("calendarContainer");
-
-  container.classList.remove("month-view", "week-view");
+  container.classList.remove("month-view","week-view");
   container.classList.add(view + "-view");
-
   document.getElementById("monthBtn").classList.remove("active");
   document.getElementById("weekBtn").classList.remove("active");
-
   document.getElementById(view + "Btn").classList.add("active");
-
-  if (view === "week") {
-    showWeek();
-  } else {
-    showMonth();
-  }
+  view === "week" ? showWeek() : showMonth();
 }
 
-// WEEK VIEW
 function showWeek() {
   const days = document.querySelectorAll(".calendar-day");
-  const current = todayDate;
-
-  const start = current - 3;
-  const end = current + 3;
-
-  days.forEach(day => {
-    const d = parseInt(day.dataset.day);
-
-    if (d >= start && d <= end) {
-      day.style.display = "block";
-    } else {
-      day.style.display = "none";
-    }
+  const s = todayDate - 3, e = todayDate + 3;
+  days.forEach(d => {
+    d.style.display = parseInt(d.dataset.day) >= s && parseInt(d.dataset.day) <= e ? "block" : "none";
   });
 }
 
-// MONTH VIEW
 function showMonth() {
-  document.querySelectorAll(".calendar-day").forEach(day => {
-    day.style.display = "block";
-  });
+  document.querySelectorAll(".calendar-day").forEach(d => d.style.display = "block");
 }
 
-// CLICK DAY
 function showTasks(day) {
   const list = document.getElementById("taskList");
   list.innerHTML = "";
-
-  document.querySelectorAll(".calendar-day").forEach(d => {
-    d.classList.remove("active-day");
-  });
-
-  const selected = document.querySelector(`[data-day='${day}']`);
-  selected.classList.add("active-day");
-
-  const filtered = tasks.filter(t =>
-    t.date.includes("-" + day.padStart(2, "0"))
-  );
-
-  if (filtered.length === 0) {
-    list.innerHTML = "<p>No tasks for this day</p>";
-    return;
-  }
-
+  document.querySelectorAll(".calendar-day").forEach(d => d.classList.remove("active-day"));
+  document.querySelector(`[data-day='${day}']`).classList.add("active-day");
+  const filtered = tasks.filter(t => t.date && t.date.includes("-" + day.padStart(2,"0")));
+  if (!filtered.length) { list.innerHTML = '<p style="color:var(--muted);font-size:14px;">No tasks for this day.</p>'; return; }
   filtered.forEach(task => {
-    list.innerHTML += `
-      <div class="task-item">
-        <h4>${task.title}</h4>
-        <p>${task.description}</p>
-      </div>
-    `;
+    list.innerHTML += `<div class="task-item"><h4>${task.title}</h4>${task.description ? '<p>' + task.description + '</p>' : ''}</div>`;
   });
 }
 
-// HIGHLIGHT TODAY
 window.onload = () => {
-  const todayEl = document.querySelector(`[data-day='${todayDate}']`);
-  if (todayEl) {
-    todayEl.classList.add("today");
-  }
+  const el = document.querySelector(`[data-day='${todayDate}']`);
+  if (el) el.classList.add("today");
 };
 
-    if ("Notification" in window) {
-    Notification.requestPermission();
-    }
-
-    setInterval(() => {
-    const now = new Date();
-
-    document.querySelectorAll(".calendar-task").forEach(task => {
-        const text = task.innerText;
-
-        // basic alert simulation
-        if (!task.classList.contains("alerted")) {
-        task.classList.add("alerted");
-
-        if (Notification.permission === "granted") {
-            new Notification("📅 Task Reminder", {
-            body: text
-            });
-        }
-        }
-    });
-    }, 60000);
-
+if ("Notification" in window) Notification.requestPermission();
 </script>
 
+<script>
+(function(){
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
+  const overlay= document.querySelector('.nav-overlay');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('visible');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
+  });
+  overlay.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  });
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }));
+})();
+</script>
 </body>
 </html>

@@ -1,110 +1,105 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
+  <title>Upload Material — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
+<nav class="navbar">
   <div class="nav-logo">
-    <img src="{{ url_for('static', filename='images/logo.png') }}">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
   </div>
-
   <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
   <div class="nav-overlay"></div>
   <div class="nav-links">
     <a href="/dashboard">Dashboard</a>
-    <a href="/planner">Planner</a>
     <a href="/classes">Classes</a>
-
-    {% if session.get("role") == "teacher" %}
-      <a href="/teacher">My Materials</a>
-      <a href="/upload">Upload</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload" class="btn btn-sm" style="margin-left:6px;">+ Upload</a>
     {% endif %}
-
     <a href="/logout">Logout</a>
   </div>
-</div>
+</nav>
 
-<!-- PAGE -->
 <div class="upload-wrapper">
 
-  <!-- LEFT -->
   <div class="upload-card">
-
+    <div class="badge">Teacher Upload</div>
     <h2>Upload Material</h2>
-    <p class="upload-sub">Share knowledge, empower others.</p>
+    <p class="upload-sub">Share knowledge and empower your students.</p>
 
     <form method="POST" enctype="multipart/form-data" class="upload-form" id="uploadForm">
 
-      <!-- TITLE -->
       <div class="form-group">
         <label>Title</label>
-        <input type="text" name="title" required>
+        <input type="text" name="title" placeholder="e.g. Grade 12 Mathematics — Calculus Notes" required>
       </div>
 
-      <!-- SUBJECT -->
       <div class="form-group">
         <label>Subject</label>
         <select name="subject" required>
-          <option value="">Select subject</option>
+          <option value="">Select a subject</option>
           <option value="math">Mathematics</option>
           <option value="phy">Physical Science</option>
+          <option value="ls">Life Science</option>
           <option value="geo">Geography</option>
+          <option value="acc">Accounting</option>
         </select>
       </div>
 
-      <!-- GRADE -->
       <div class="form-group">
         <label>Grade</label>
         <select name="grade" required>
-          <option value="">Select grade</option>
+          <option value="">Select a grade</option>
+          <option value="8">Grade 8</option>
+          <option value="9">Grade 9</option>
           <option value="10">Grade 10</option>
           <option value="11">Grade 11</option>
           <option value="12">Grade 12</option>
         </select>
       </div>
 
-      <!-- DROP AREA -->
-      <div class="drop-area" id="dropArea">
-        <input type="file" name="file" id="fileInput" hidden required>
-
-        <div class="drop-content">
-          <p><strong>Click or drag file here</strong></p>
-          <span>PDF, DOC, DOCX, PPT (Max 20MB)</span>
+      <div class="form-group">
+        <label>File</label>
+        <div class="drop-area" id="dropArea">
+          <input type="file" name="file" id="fileInput" hidden required>
+          <div class="drop-content">
+            <div style="font-size:2.4rem;margin-bottom:12px;">📂</div>
+            <p><strong>Click to browse or drag &amp; drop</strong></p>
+            <span>PDF, DOC, DOCX, PPT, PPTX — max 20MB</span>
+          </div>
         </div>
+        <div id="filePreview" class="file-preview hidden"></div>
+        <div id="errorMsg" class="error-msg hidden"></div>
       </div>
 
-      <!-- PREVIEW -->
-      <div id="filePreview" class="file-preview hidden"></div>
-
-      <!-- PROGRESS -->
       <div class="progress-bar hidden" id="progressBar">
-        <div class="progress"></div>
+        <div class="progress" id="progressFill"></div>
       </div>
 
-      <!-- ERROR -->
-      <div id="errorMsg" class="error-msg hidden"></div>
-
-      <!-- BUTTON -->
-      <button type="submit" class="upload-btn">
-        ⬆ Upload Material
-      </button>
+      <button type="submit" class="btn upload-btn">⬆ Upload Material</button>
 
     </form>
-
   </div>
 
-  <!-- RIGHT -->
   <div class="info-box">
-    ⭐ Upload high-quality notes to help students succeed.<br><br>
-    📄 Supported: PDF, DOC, PPT<br>
-    ⚡ Max size: 20MB<br>
-    🚀 Faster uploads = better experience
+    <div style="font-size:1.5rem;margin-bottom:16px;">💡</div>
+    <strong style="color:#fff;font-size:15px;">Tips for great uploads</strong>
+    <br><br>
+    ⭐ Use a clear, descriptive title<br>
+    📄 PDF files work best for all devices<br>
+    🎯 Match the correct grade and subject<br>
+    ⚡ Max file size: 20MB<br>
+    📊 Track downloads from My Materials<br>
+    <br>
+    <a href="/teacher" style="color:var(--accent);font-weight:600;font-size:13px;">← Back to My Materials</a>
   </div>
 
 </div>
@@ -112,32 +107,22 @@
 <script>
 const dropArea = document.getElementById("dropArea");
 const fileInput = document.getElementById("fileInput");
-const preview = document.getElementById("filePreview");
+const preview  = document.getElementById("filePreview");
 const errorMsg = document.getElementById("errorMsg");
 const progressBar = document.getElementById("progressBar");
-const progress = document.querySelector(".progress");
+const progressFill = document.getElementById("progressFill");
 
-const allowedTypes = ["application/pdf",
-  "application/msword",
+const allowed = ["application/pdf","application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-powerpoint"
-];
-
-const maxSize = 20 * 1024 * 1024; // 20MB
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation"];
+const maxSize = 20 * 1024 * 1024;
 
 dropArea.onclick = () => fileInput.click();
-
 fileInput.onchange = () => handleFile(fileInput.files[0]);
 
-dropArea.addEventListener("dragover", e => {
-  e.preventDefault();
-  dropArea.classList.add("dragging");
-});
-
-dropArea.addEventListener("dragleave", () => {
-  dropArea.classList.remove("dragging");
-});
-
+dropArea.addEventListener("dragover", e => { e.preventDefault(); dropArea.classList.add("dragging"); });
+dropArea.addEventListener("dragleave", () => dropArea.classList.remove("dragging"));
 dropArea.addEventListener("drop", e => {
   e.preventDefault();
   dropArea.classList.remove("dragging");
@@ -148,65 +133,57 @@ dropArea.addEventListener("drop", e => {
 
 function handleFile(file) {
   if (!file) return;
-
   errorMsg.classList.add("hidden");
-
-  if (!allowedTypes.includes(file.type)) {
-    showError("Unsupported file type");
-    return;
+  if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|doc|docx|ppt|pptx)$/i)) {
+    return showError("Unsupported file type. Please use PDF, DOC, DOCX, or PPT.");
   }
-
-  if (file.size > maxSize) {
-    showError("File too large (max 20MB)");
-    return;
-  }
-
+  if (file.size > maxSize) return showError("File too large. Maximum size is 20MB.");
   preview.classList.remove("hidden");
-  preview.innerHTML = `
-    <div class="preview-card">
-      📄 <strong>${file.name}</strong>
-      <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
-    </div>
-  `;
+  preview.innerHTML = `<div class="preview-card">📄 <strong>${file.name}</strong><span>${(file.size/1024/1024).toFixed(2)} MB</span></div>`;
 }
 
 function showError(msg) {
-  errorMsg.innerText = msg;
+  errorMsg.innerText = "⚠ " + msg;
   errorMsg.classList.remove("hidden");
   preview.classList.add("hidden");
 }
 
-document.getElementById("uploadForm").addEventListener("submit", function(e) {
+document.getElementById("uploadForm").addEventListener("submit", function() {
   progressBar.classList.remove("hidden");
-
-  let width = 0;
-  const interval = setInterval(() => {
-    width += 10;
-    progress.style.width = width + "%";
-
-    if (width >= 100) clearInterval(interval);
-  }, 100);
+  let w = 0;
+  const iv = setInterval(() => {
+    w = Math.min(w + 8, 92);
+    progressFill.style.width = w + "%";
+    if (w >= 92) clearInterval(iv);
+  }, 120);
 });
 </script>
 
 <script>
-const navToggle = document.querySelector(".nav-toggle");
-const navLinks = document.querySelector(".nav-links");
-const navOverlay = document.querySelector(".nav-overlay");
-if (navToggle) {
-  navToggle.addEventListener("click", () => {
-    navToggle.classList.toggle("open");
-    navLinks.classList.toggle("open");
-    navOverlay.classList.toggle("visible");
-    document.body.style.overflow = navLinks.classList.contains("open") ? "hidden" : "";
+(function(){
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
+  const overlay= document.querySelector('.nav-overlay');
+  if(!toggle) return;
+  toggle.addEventListener('click', () => {
+    toggle.classList.toggle('open');
+    links.classList.toggle('open');
+    overlay.classList.toggle('visible');
+    document.body.style.overflow = links.classList.contains('open') ? 'hidden' : '';
   });
-  navOverlay.addEventListener("click", () => {
-    navToggle.classList.remove("open");
-    navLinks.classList.remove("open");
-    navOverlay.classList.remove("visible");
-    document.body.style.overflow = "";
+  overlay.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
   });
-}
+  links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+    overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }));
+})();
 </script>
 </body>
 </html>

@@ -1,46 +1,62 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+  <title>Register — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
 </head>
 <body>
-
 <div class="auth-container">
 
   <div class="auth-left">
-
-    <img src="{{ url_for('static', filename='images/logo.png') }}" style="width:120px; margin-bottom:20px;">
-
-    <h1>Create Account ✨</h1>
-    <p>Join Laurion today</p>
-
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion">
+    <h1>Join Laurion ✨</h1>
+    <p>Create your free account and get instant access to study materials, notes, and planning tools.</p>
+    <ul class="auth-features">
+      <li>Free forever — no credit card</li>
+      <li>Access materials by grade &amp; subject</li>
+      <li>Built-in planner and notes</li>
+      <li>Teachers can upload and manage files</li>
+    </ul>
   </div>
 
   <div class="auth-right">
-
     <form method="POST" class="form-box">
-
-      <h2>Register</h2>
+      <h2>Create account</h2>
+      <p class="form-subtitle">Takes less than a minute</p>
       {% if error %}
       <div class="error-box">{{ error }}</div>
       {% endif %}
-      <input name="username" placeholder="Username" required>
-      <input type="password" name="password" placeholder="Password" required>
-
-      <select name="role">
-        <option value="student">Student</option>
-        <option value="teacher">Teacher</option>
-      </select>
-
-      <button class="btn">Register</button>
-
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input id="username" name="username" placeholder="Choose a username" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password" type="password" name="password" placeholder="Create a password" required autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>I am a…</label>
+        <div class="role-picker">
+          <label class="role-option">
+            <input type="radio" name="role" value="student" checked>
+            <div class="role-icon">🎓</div>
+            <div class="role-label">Student</div>
+          </label>
+          <label class="role-option">
+            <input type="radio" name="role" value="teacher">
+            <div class="role-icon">👨‍🏫</div>
+            <div class="role-label">Teacher</div>
+          </label>
+        </div>
+      </div>
+      <button class="btn">Create account →</button>
+      <p>Already have an account? <a href="/login">Log in</a></p>
     </form>
-
   </div>
 
 </div>
-
 </body>
 </html>

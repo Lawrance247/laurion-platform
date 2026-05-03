@@ -103,7 +103,9 @@
 </script>
 <script>
 window.addEventListener("DOMContentLoaded", () => {
-  LAURION_OFFLINE.init();
+  if (window.LAURION_OFFLINE) {
+    LAURION_OFFLINE.init();
+  }
 });
 </script>
 </body>

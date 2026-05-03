@@ -202,14 +202,21 @@
 
 <script>
 window.addEventListener("DOMContentLoaded", () => {
-  LAURION_OFFLINE.init();
+  if (window.LAURION_OFFLINE) {
+    LAURION_OFFLINE.init();
+  }
 });
 </script>
 <script>
 let deferredPrompt = null;
 let isInstalled = false;
 
-// detect installed
+// restore install state
+if (localStorage.getItem("appInstalled")) {
+  isInstalled = true;
+}
+
+// detect installed (PWA mode)
 if (window.matchMedia('(display-mode: standalone)').matches) {
   isInstalled = true;
 }
@@ -222,10 +229,13 @@ window.addEventListener('beforeinstallprompt', (e) => {
   const btn = document.getElementById("installBtn");
   if (btn) btn.style.display = "inline-flex";
 
+  // smart banner delay
   setTimeout(() => {
     if (!isInstalled && !localStorage.getItem("installDismissed")) {
       const banner = document.getElementById("installBanner");
-      if (banner) banner.style.display = "flex";
+      if (banner && window.scrollY < 200) {
+        banner.style.display = "flex";
+      }
     }
   }, 6000);
 });
@@ -238,6 +248,7 @@ async function triggerInstall() {
   }
 }
 
+// dismiss banner
 function dismissBanner(){
   const banner = document.getElementById("installBanner");
   if (banner) banner.style.display = "none";
@@ -245,13 +256,13 @@ function dismissBanner(){
   localStorage.setItem("installDismissed","true");
 }
 
-// safe button binding
+// bind button safely
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("installBtn");
   if (btn) btn.addEventListener("click", triggerInstall);
 });
 
-// installed state
+// installed state UI
 function showInstalledState() {
   const btn = document.getElementById("installBtn");
   const banner = document.getElementById("installBanner");
@@ -260,9 +271,10 @@ function showInstalledState() {
   if (banner) banner.style.display = "none";
 }
 
-// detect install
+// detect real install
 window.addEventListener('appinstalled', () => {
   isInstalled = true;
+  localStorage.setItem("appInstalled", "true");
   showInstalledState();
   incrementInstall();
 });
@@ -278,23 +290,30 @@ function getCachedInstallCount() {
 }
 
 async function loadInstallCount() {
+  const el = document.getElementById("installCount");
+
   try {
     const res = await fetch("/install-count");
     const data = await res.json();
 
     cacheInstallCount(data.count);
 
-  document.getElementById("installCount").innerText =
-    "🔥 " + data.count.toLocaleString() + " students are already using Laurion";
+    if (el) {
+      el.innerText =
+        "🔥 " + data.count.toLocaleString() + " students are already using Laurion";
+    }
+
   } catch {
     const cached = getCachedInstallCount();
 
-    if (cached) {
-      document.getElementById("installCount").innerText =
-        "🔥 " + parseInt(cached).toLocaleString() + " students are already using Laurion";
-    } else {
-      document.getElementById("installCount").innerText =
-        "🔥 Thousands of students using Laurion";
+    if (el) {
+      if (cached) {
+        el.innerText =
+          "🔥 " + parseInt(cached).toLocaleString() + " students are already using Laurion";
+      } else {
+        el.innerText =
+          "🔥 Thousands of students using Laurion";
+      }
     }
   }
 }
@@ -305,6 +324,7 @@ async function incrementInstall() {
   } catch {}
 }
 
+// load immediately
 loadInstallCount();
 </script>
 

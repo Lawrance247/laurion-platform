@@ -322,3 +322,33 @@ label{display:block;font-weight:600;font-size:13px;color:var(--text-sub);margin-
   .classes-grid{grid-template-columns:repeat(2,1fr)}
   #calendarContainer.month-view{grid-template-columns:repeat(3,1fr)}
 }
+
+.install-stats {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #9ca3af;
+}
+
+.install-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0b1f3a;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 12px 18px;
+  border-radius: 14px;
+  display: none;
+  align-items: center;
+  gap: 15px;
+  z-index: 999;
+}
+
+.install-banner button {
+  background: #1a9e5c;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}

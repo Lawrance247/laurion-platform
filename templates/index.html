@@ -3,9 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
   <title>Laurion — Smart Learning Platform</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
   <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
 </head>
 <body>
 
@@ -30,10 +38,18 @@
     <div class="badge">✦ Smart Learning Platform</div>
     <h1>Study smarter.<br><span>Achieve more.</span></h1>
     <p>Quality study materials for grades 8–12, organised by subject and uploaded by real teachers — all in one place.</p>
-    <div class="hero-buttons">
-      <a href="/register" class="btn">Start for free →</a>
-      <a href="/login" class="btn-outline">Log in</a>
-    </div>
+  <div class="hero-buttons">
+    <button id="installBtn" class="btn" style="display:none;">
+      📲 Install Laurion
+    </button>
+
+    <a href="/register" class="btn">Start for free →</a>
+    <a href="/login" class="btn-outline">Log in</a>
+  </div>
+
+  <p id="installCount" class="install-stats">
+    🔥 Loading installs...
+  </p>
   </div>
   <div class="hero-right">
     <div class="hero-circle"></div>
@@ -175,5 +191,114 @@
   }));
 })();
 </script>
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+  LAURION_OFFLINE.init();
+});
+</script>
+
+<script>
+let deferredPrompt = null;
+let isInstalled = false;
+
+// Detect installed
+if (window.matchMedia('(display-mode: standalone)').matches) {
+  isInstalled = true;
+}
+
+// Install available
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  document.getElementById("installBtn").style.display = "inline-flex";
+
+  setTimeout(() => {
+    if (!isInstalled) {
+      document.getElementById("installBanner").style.display = "flex";
+    }
+  }, 6000);
+});
+
+// Trigger install
+async function triggerInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+
+    const choice = await deferredPrompt.userChoice;
+
+    if (choice.outcome === 'accepted') {
+      showInstalledState();
+      incrementInstall();
+    }
+
+    deferredPrompt = null;
+  }
+}
+
+// Button click
+document.getElementById("installBtn").addEventListener("click", triggerInstall);
+
+// Installed UI
+function showInstalledState() {
+  document.getElementById("installBtn").innerHTML = "✅ Installed";
+  document.getElementById("installBanner").style.display = "none";
+}
+
+// Detect real install
+window.addEventListener('appinstalled', () => {
+  showInstalledState();
+  incrementInstall();
+});
+</script>
+
+<script>
+function cacheInstallCount(count) {
+  localStorage.setItem("installCount", count);
+}
+
+function getCachedInstallCount() {
+  return localStorage.getItem("installCount");
+}
+
+async function loadInstallCount() {
+  try {
+    const res = await fetch("/install-count");
+    const data = await res.json();
+
+    cacheInstallCount(data.count);
+
+    document.getElementById("installCount").innerText =
+      "🔥 " + data.count.toLocaleString() + " students installed Laurion";
+  } catch {
+    const cached = getCachedInstallCount();
+
+    if (cached) {
+      document.getElementById("installCount").innerText =
+        "🔥 " + parseInt(cached).toLocaleString() + " students installed Laurion";
+    } else {
+      document.getElementById("installCount").innerText =
+        "🔥 Thousands of students using Laurion";
+    }
+  }
+}
+
+async function incrementInstall() {
+  try {
+    await fetch("/increment-install", { method: "POST" });
+  } catch {}
+}
+
+loadInstallCount();
+</script>
+
+<div id="installBanner" class="install-banner">
+  <div>
+    <strong>Install Laurion</strong>
+    <p>Study offline. No data needed.</p>
+  </div>
+  <button onclick="triggerInstall()">Install</button>
+</div>
+
 </body>
 </html>

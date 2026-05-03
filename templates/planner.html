@@ -3,9 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
   <title>Planner — Laurion</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
   <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
 </head>
 <body>
 
@@ -41,7 +49,7 @@
   <!-- ADD TASK -->
   <div class="planner-card">
     <h3 style="font-size:1rem;color:var(--text-sub);margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Add a Task</h3>
-    <form method="POST" style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;">
+    <form method="POST" data-offline="task" style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;">
       <div>
         <input name="title" placeholder="Task title" required>
       </div>
@@ -180,6 +188,11 @@ if ("Notification" in window) Notification.requestPermission();
     document.body.style.overflow = '';
   }));
 })();
+</script>
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+  LAURION_OFFLINE.init();
+});
 </script>
 </body>
 </html>

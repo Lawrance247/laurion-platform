@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, flash, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 from datetime import datetime
@@ -34,7 +35,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # ✅ CREATE TABLES ON START (SAFE)
-@app.before_request
+@app.before_first_request
 def create_tables():
     db.create_all()
 
@@ -92,7 +93,7 @@ class Planner(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200))
     description = db.Column(db.String(500))
-    date = db.Column(db.String(50))
+    date = db.Column(db.DateTime)
     subject = db.Column(db.String(50))
     material_id = db.Column(db.Integer)
     role = db.Column(db.String(20))
@@ -185,7 +186,8 @@ def register():
         if existing:
             error = "Username already exists"
         else:
-            db.session.add(User(username=username, password=password, role=role))
+            hashed = generate_password_hash(password)
+            db.session.add(User(username=username, password=hashed, role=role))
             db.session.commit()
             return redirect("/login")
 
@@ -198,11 +200,10 @@ def login():
 
     if request.method == "POST":
         user = User.query.filter_by(
-            username=request.form["username"],
-            password=request.form["password"]
+            username=request.form["username"]
         ).first()
 
-        if user:
+        if user and check_password_hash(user.password, request.form["password"]):
             session["user"] = user.username
             session["role"] = user.role
             return redirect("/dashboard")
@@ -234,24 +235,23 @@ def dashboard():
         db.session.add(Planner(
             title=request.form["title"],
             description=request.form["description"],
-            date=request.form["date"],
+            date = datetime.fromisoformat(request.form["date"]),
             role=role,
             user=username
         ))
         db.session.commit()
 
     materials = Material.query.order_by(Material.id.desc()).limit(5).all()
-
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now().date()
 
     tasks_today = Planner.query.filter(
         Planner.user == username,
-        Planner.date.contains(today)
+        db.func.date(Planner.date) == today
     ).all()
 
     overdue_tasks = Planner.query.filter(
         Planner.user == username,
-        Planner.date < today
+        Planner.date < datetime.now()
     ).all()
 
     total_downloads = db.session.query(
@@ -319,6 +319,11 @@ def subject(grade, code):
 # 📁 UPLOAD
 # ======================
 
+ALLOWED_EXTENSIONS = {"pdf", "docx", "pptx"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @app.route("/upload", methods=["GET", "POST"])
 def upload():
     if "user" not in session:
@@ -335,6 +340,10 @@ def upload():
 
         if not file or not title:
             flash("Fill all fields")
+            return redirect("/upload")
+
+        if not allowed_file(file.filename):
+            flash("Invalid file type")
             return redirect("/upload")
 
         filename = secure_filename(file.filename)
@@ -429,7 +438,48 @@ def notes():
 
     return render_template("notes.html", content=content, subject=subject, grade=grade)
 
+@app.route("/sync-notes", methods=["POST"])
+def sync_notes():
+    if "user" not in session:
+        return {"error": "Unauthorized"}, 403
 
+    data = request.get_json()
+
+    note = Note.query.filter_by(
+        user=session["user"],
+        subject=data["subject"],
+        grade=data["grade"]
+    ).first()
+
+    if note:
+        note.content = data["content"]
+    else:
+        db.session.add(Note(
+            content=data["content"],
+            subject=data["subject"],
+            grade=data["grade"],
+            user=session["user"]
+        ))
+
+    db.session.commit()
+    return {"status": "ok"}
+
+@app.route("/sync-planner", methods=["POST"])
+def sync_planner():
+    if "user" not in session:
+        return {"error": "Unauthorized"}, 403
+
+    data = request.get_json()
+
+    db.session.add(Planner(
+        title=data["title"],
+        description=data["description"],
+        date=datetime.fromisoformat(data["date"]),
+        user=session["user"]
+    ))
+
+    db.session.commit()
+    return {"status": "ok"}
 # ======================
 # 🧰 UTIL
 # ======================

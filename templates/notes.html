@@ -3,10 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
   <title>My Notes — Laurion</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
   <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="/static/offline.js" defer></script>
 </head>
 <body>
 
@@ -64,7 +72,7 @@
     <div style="font-size:13px;color:var(--muted);margin-bottom:8px;" id="wordCount">0 words</div>
 
     <!-- NOTES FORM -->
-    <form method="POST">
+    <form method="POST" data-offline="notes">
       <input type="hidden" name="subject" value="{{ subject }}">
       <input type="hidden" name="grade" value="{{ grade }}">
       <textarea name="content" class="notes-textarea"
@@ -181,6 +189,11 @@ notesArea.addEventListener("input", () => {
     document.body.style.overflow = '';
   }));
 })();
+</script>
+<script>
+window.addEventListener("DOMContentLoaded", () => {
+  LAURION_OFFLINE.init();
+});
 </script>
 </body>
 </html>

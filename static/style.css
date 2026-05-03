@@ -352,3 +352,11 @@ label{display:block;font-weight:600;font-size:13px;color:var(--text-sub);margin-
   color: white;
   cursor: pointer;
 }
+
+@media(max-width:480px){
+  .install-banner{
+    width:90%;
+    left:5%;
+    transform:none;
+  }
+}

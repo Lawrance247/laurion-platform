@@ -164,6 +164,14 @@
   </div>
 </section>
 
+<div id="installBanner" class="install-banner">
+  <div>
+    <strong>Install Laurion</strong>
+    <p>Study offline. No data needed.</p>
+  </div>
+  <button onclick="triggerInstall()">Install</button>
+  <span onclick="dismissBanner()" style="cursor:pointer;">✕</span>
+</div>
 
 <script>
 (function(){
@@ -191,62 +199,70 @@
   }));
 })();
 </script>
+
 <script>
 window.addEventListener("DOMContentLoaded", () => {
   LAURION_OFFLINE.init();
 });
 </script>
-
 <script>
 let deferredPrompt = null;
 let isInstalled = false;
 
-// Detect installed
+// detect installed
 if (window.matchMedia('(display-mode: standalone)').matches) {
   isInstalled = true;
 }
 
-// Install available
+// install available
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
 
-  document.getElementById("installBtn").style.display = "inline-flex";
+  const btn = document.getElementById("installBtn");
+  if (btn) btn.style.display = "inline-flex";
 
   setTimeout(() => {
-    if (!isInstalled) {
-      document.getElementById("installBanner").style.display = "flex";
+    if (!isInstalled && !localStorage.getItem("installDismissed")) {
+      const banner = document.getElementById("installBanner");
+      if (banner) banner.style.display = "flex";
     }
   }, 6000);
 });
 
-// Trigger install
+// install trigger
 async function triggerInstall() {
   if (deferredPrompt) {
     deferredPrompt.prompt();
-
-    const choice = await deferredPrompt.userChoice;
-
-    if (choice.outcome === 'accepted') {
-      showInstalledState();
-      incrementInstall();
-    }
-
     deferredPrompt = null;
   }
 }
 
-// Button click
-document.getElementById("installBtn").addEventListener("click", triggerInstall);
+function dismissBanner(){
+  const banner = document.getElementById("installBanner");
+  if (banner) banner.style.display = "none";
 
-// Installed UI
-function showInstalledState() {
-  document.getElementById("installBtn").innerHTML = "✅ Installed";
-  document.getElementById("installBanner").style.display = "none";
+  localStorage.setItem("installDismissed","true");
 }
 
-// Detect real install
+// safe button binding
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("installBtn");
+  if (btn) btn.addEventListener("click", triggerInstall);
+});
+
+// installed state
+function showInstalledState() {
+  const btn = document.getElementById("installBtn");
+  const banner = document.getElementById("installBanner");
+
+  if (btn) btn.style.display = "none";
+  if (banner) banner.style.display = "none";
+}
+
+// detect install
 window.addEventListener('appinstalled', () => {
+  isInstalled = true;
   showInstalledState();
   incrementInstall();
 });
@@ -268,14 +284,14 @@ async function loadInstallCount() {
 
     cacheInstallCount(data.count);
 
-    document.getElementById("installCount").innerText =
-      "🔥 " + data.count.toLocaleString() + " students installed Laurion";
+  document.getElementById("installCount").innerText =
+    "🔥 " + data.count.toLocaleString() + " students are already using Laurion";
   } catch {
     const cached = getCachedInstallCount();
 
     if (cached) {
       document.getElementById("installCount").innerText =
-        "🔥 " + parseInt(cached).toLocaleString() + " students installed Laurion";
+        "🔥 " + parseInt(cached).toLocaleString() + " students are already using Laurion";
     } else {
       document.getElementById("installCount").innerText =
         "🔥 Thousands of students using Laurion";
@@ -291,14 +307,6 @@ async function incrementInstall() {
 
 loadInstallCount();
 </script>
-
-<div id="installBanner" class="install-banner">
-  <div>
-    <strong>Install Laurion</strong>
-    <p>Study offline. No data needed.</p>
-  </div>
-  <button onclick="triggerInstall()">Install</button>
-</div>
 
 </body>
 </html>

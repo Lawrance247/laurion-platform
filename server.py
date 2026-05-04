@@ -166,15 +166,23 @@ def dashboard():
         db.session.commit()
         return redirect("/dashboard")
 
+    # Cast the date column to TIMESTAMP so Postgres can compare it regardless
+    # of whether it was originally created as VARCHAR or TIMESTAMP (legacy issue).
+    from sqlalchemy import cast, DateTime as SADateTime
+    date_col    = cast(Planner.date, SADateTime)
+    today_start = datetime.combine(today, datetime.min.time())
+    today_end   = datetime.combine(today, datetime.max.time())
+
     tasks_today = Planner.query.filter(
         Planner.user == username,
-        db.func.date(Planner.date) == today
-    ).order_by(Planner.date).all()
+        date_col >= today_start,
+        date_col <= today_end,
+    ).order_by(date_col).all()
 
     overdue_tasks = Planner.query.filter(
         Planner.user == username,
-        Planner.date < datetime.combine(today, datetime.min.time())
-    ).order_by(Planner.date.desc()).all()
+        date_col < today_start,
+    ).order_by(date_col.desc()).all()
 
     total_downloads   = db.session.query(func.sum(Material.downloads)).scalar() or 0
     popular_materials = Material.query.order_by(Material.downloads.desc()).limit(5).all()
@@ -271,7 +279,9 @@ def planner():
         ))
         db.session.commit()
         return redirect("/planner")
-    tasks = Planner.query.filter_by(user=session["user"]).order_by(Planner.date).all()
+    from sqlalchemy import cast, DateTime as SADateTime
+    date_col = cast(Planner.date, SADateTime)
+    tasks = Planner.query.filter_by(user=session["user"]).order_by(date_col).all()
     return render_template("planner.html", tasks=tasks, subjects=SUBJECTS)
 
 @app.route("/delete_task/<int:id>")
@@ -372,6 +382,38 @@ def api_notes():
     grade   = request.args.get("grade", 12, type=int)
     note    = Note.query.filter_by(user=session["user"], subject=subject, grade=grade).first()
     return jsonify({"content": note.content if note else ""})
+
+
+# ── ONE-TIME MIGRATION ────────────────────────────────────────────────────────
+# Run GET /migrate-db once after deploying to fix the date column type on Render.
+# This converts planner.date from VARCHAR to TIMESTAMP so date comparisons work.
+@app.route("/migrate-db")
+def migrate_db():
+    try:
+        with db.engine.connect() as conn:
+            # Check current column type
+            result = conn.execute(db.text(
+                "SELECT data_type FROM information_schema.columns "
+                "WHERE table_name='planner' AND column_name='date'"
+            ))
+            row = result.fetchone()
+            if not row:
+                return "Column not found — has the table been created?", 400
+
+            col_type = row[0].lower()
+            if "timestamp" in col_type or "date" in col_type:
+                return f"✅ Column already correct type: {row[0]}. No migration needed.", 200
+
+            # Convert: cast existing string values to timestamp, change column type
+            conn.execute(db.text(
+                "ALTER TABLE planner "
+                "ALTER COLUMN date TYPE TIMESTAMP "
+                "USING date::TIMESTAMP"
+            ))
+            conn.commit()
+            return "✅ Migration complete — planner.date converted to TIMESTAMP.", 200
+    except Exception as e:
+        return f"❌ Migration failed: {e}", 500
 
 @app.errorhandler(404)
 def not_found(e):

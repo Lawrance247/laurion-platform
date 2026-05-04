@@ -200,13 +200,7 @@
 })();
 </script>
 
-<script>
-window.addEventListener("DOMContentLoaded", () => {
-  if (window.LAURION_OFFLINE) {
-    LAURION_OFFLINE.init();
-  }
-});
-</script>
+
 <script>
 let deferredPrompt = null;
 let isInstalled = false;
@@ -328,5 +322,6 @@ async function incrementInstall() {
 loadInstallCount();
 </script>
 
+<script src="{{ url_for('static', filename='school.js') }}" defer></script>
 </body>
 </html>

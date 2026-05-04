@@ -171,12 +171,7 @@ gradeFilter.addEventListener("change", filterMaterials);
   }));
 })();
 </script>
-<script>
-window.addEventListener("DOMContentLoaded", () => {
-  if (window.LAURION_OFFLINE) {
-    LAURION_OFFLINE.init();
-  }
-});
-</script>
+
+<script src="{{ url_for('static', filename='school.js') }}" defer></script>
 </body>
 </html>

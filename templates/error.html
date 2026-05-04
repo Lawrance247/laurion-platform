@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+</head>
+<body style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;background:var(--bg);">
+  <img src="{{ url_for('static', filename='images/logo.png') }}" style="width:80px;margin-bottom:24px;opacity:0.7;">
+  <h1 style="font-family:'Sora',sans-serif;font-size:1.6rem;color:var(--secondary);margin-bottom:12px;">Something went wrong</h1>
+  <p style="color:var(--text-sub);font-size:15px;margin-bottom:28px;text-align:center;max-width:400px;">{{ message }}</p>
+  <a href="/" class="btn">← Back to home</a>
+</body>
+</html>

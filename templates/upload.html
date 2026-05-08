@@ -14,6 +14,10 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
   <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
   <script src="/static/offline.js" defer></script>
+  <style>
+    #titleInput.auto-filled { border-color: var(--accent); }
+    #titleInput.auto-filled:focus { border-color: var(--accent); }
+  </style>
 </head>
 <body>
 
@@ -51,7 +55,7 @@
 
       <div class="form-group">
         <label>Title</label>
-        <input type="text" name="title" placeholder="e.g. Grade 12 Mathematics — Calculus Notes" required>
+        <input type="text" name="title" id="titleInput" placeholder="Select a file to auto-fill title" required>
       </div>
 
       <div class="form-group">
@@ -143,6 +147,18 @@ dropArea.addEventListener("drop", e => {
   handleFile(file);
 });
 
+function filenameToTitle(filename) {
+  // Strip extension
+  let name = filename.replace(/\.[^/.]+$/, "");
+  // Replace underscores, hyphens, dots with spaces
+  name = name.replace(/[_\-\.]+/g, " ");
+  // Remove trailing numbers that look like timestamps (7+ digits)
+  name = name.replace(/\s*\d{7,}\s*$/, "").trim();
+  // Title-case each word
+  name = name.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+  return name;
+}
+
 function handleFile(file) {
   if (!file) return;
   errorMsg.classList.add("hidden");
@@ -152,6 +168,13 @@ function handleFile(file) {
   if (file.size > maxSize) return showError("File too large. Maximum size is 20MB.");
   preview.classList.remove("hidden");
   preview.innerHTML = `<div class="preview-card">📄 <strong>${file.name}</strong><span>${(file.size/1024/1024).toFixed(2)} MB</span></div>`;
+
+  // Auto-fill title only if user hasn't typed one yet
+  const titleInput = document.getElementById("titleInput");
+  if (!titleInput.value.trim()) {
+    titleInput.value = filenameToTitle(file.name);
+    titleInput.classList.add("auto-filled");
+  }
 }
 
 function showError(msg) {

@@ -12,7 +12,7 @@ from flask import send_file
 from rebrand_pdf import rebrand_pdf_bytes
 
 app = Flask(__name__)
-app.secret_key = os.getenv("SECRET_KEY", "laurion-dev-key-change-in-production")
+app.secret_key = os.getenv("SECRET_KEY", "00538db5f43fef83c1b7c6c04440766e4930f2dfb305f9011d1e7993ce416dd2")
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:////tmp/laurion.db")
 if DATABASE_URL.startswith("postgres://"):

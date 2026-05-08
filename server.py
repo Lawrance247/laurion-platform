@@ -58,10 +58,11 @@ class Material(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
     title       = db.Column(db.String(200))
     filename    = db.Column(db.String(500))  # stores Cloudinary URL
-    subject     = db.Column(db.String(100))
-    grade       = db.Column(db.Integer)
+    subject = db.Column(db.String(100), index=True)
+    grade   = db.Column(db.Integer, index=True)
     uploaded_by = db.Column(db.String(100))
     downloads   = db.Column(db.Integer, default=0)
+
 
 class Planner(db.Model):
     id          = db.Column(db.Integer, primary_key=True)
@@ -69,14 +70,15 @@ class Planner(db.Model):
     description = db.Column(db.String(500))
     date        = db.Column(db.DateTime)
     subject     = db.Column(db.String(50))
-    user        = db.Column(db.String(100))
+    user = db.Column(db.String(100), index=True)
 
 class Note(db.Model):
     id      = db.Column(db.Integer, primary_key=True)
     content = db.Column(db.Text)
-    subject = db.Column(db.String(50))
+    subject = db.Column(db.String(50), index=True)
     grade   = db.Column(db.Integer)
-    user    = db.Column(db.String(100))
+    user    = db.Column(db.String(100), index=True)
+
 
 class InstallCount(db.Model):
     id    = db.Column(db.Integer, primary_key=True)
@@ -126,8 +128,7 @@ def teacher_required(f):
         return f(*args, **kwargs)
     return decorated
 
-@app.before_request
-def create_tables():
+with app.app_context():
     db.create_all()
 
 # ── ROUTES ────────────────────────────────────────────────────────────────────

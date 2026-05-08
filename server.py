@@ -238,6 +238,17 @@ def subject(grade, code):
     return render_template("subject.html", grade=grade, subject=SUBJECTS.get(code), code=code,
                            materials=materials, get_file_icon=get_file_icon)
 
+@app.route("/admin/fix-legacy-materials")
+@admin_required
+def fix_legacy_materials():
+    bad = Material.query.filter(
+        ~Material.filename.startswith("http")
+    ).all()
+    count = len(bad)
+    for m in bad:
+        db.session.delete(m)
+    db.session.commit()
+    return f"Deleted {count} legacy material(s) with no valid URL.", 200
 
 @app.route("/download/<int:id>")
 @login_required
@@ -246,9 +257,13 @@ def download(id):
     material.downloads += 1
     db.session.commit()
 
-    file_url = material.filename  # now stores the Cloudinary URL
+    file_url = material.filename
 
-    # PDF: fetch from Cloudinary, rebrand on-the-fly, serve to user
+    # Guard: legacy entry with no URL — nothing to serve
+    if not file_url.startswith("http://") and not file_url.startswith("https://"):
+        return render_template("error.html", message="This file is no longer available. Please ask your teacher to re-upload it."), 404
+
+    # PDF: fetch from Cloudinary, rebrand on-the-fly
     if "/raw/upload/" in file_url or file_url.lower().split("?")[0].endswith(".pdf"):
         import urllib.request
         with urllib.request.urlopen(file_url) as resp:
@@ -264,9 +279,7 @@ def download(id):
             download_name=download_name,
         )
 
-    # Non-PDF: redirect straight to Cloudinary URL
     return redirect(file_url)
-
 
 @app.route("/teacher")
 @teacher_required

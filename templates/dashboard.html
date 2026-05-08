@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+  <title>Dashboard — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+  <div class="nav-links">
+    <button class="nav-close" aria-label="Close menu">✕</button>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/classes">Classes</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">+ Upload</a>
+    {% endif %}
+    <a href="/logout">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER CARD -->
+  <div class="dash-header">
+    <div>
+      <h1>Hey {{ username }} 👋</h1>
+      <p>
+        {% if role == 'teacher' %}Ready to guide your students today?
+        {% else %}Ready to level up your learning?{% endif %}
+      </p>
+    </div>
+    <div class="dash-avatar">
+      {{ username[0].upper() }}
+    </div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stats-grid">
+    {% if role == 'teacher' %}
+    <div class="stat-card">
+      <div class="stat-icon">📤</div>
+      <h2>Upload</h2>
+      <p>Share a new material</p>
+      <a href="/upload" class="btn btn-sm" style="margin-top:10px;">Upload now</a>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📁</div>
+      <h2>My Files</h2>
+      <p>Manage your uploads</p>
+      <a href="/teacher" class="btn btn-sm" style="margin-top:10px;">View all</a>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⬇️</div>
+      <h2>{{ total_downloads }}</h2>
+      <p>Total downloads across all materials</p>
+    </div>
+    {% else %}
+    <div class="stat-card">
+      <div class="stat-icon">📚</div>
+      <h2>Classes</h2>
+      <p>Browse study materials</p>
+      <a href="/classes" class="btn btn-sm" style="margin-top:10px;">Browse</a>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📝</div>
+      <h2>Notes</h2>
+      <p>Write and export notes</p>
+      <a href="/notes" class="btn btn-sm" style="margin-top:10px;">Open</a>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📅</div>
+      <h2>Planner</h2>
+      <p>Manage your tasks</p>
+      <a href="/planner" class="btn btn-sm" style="margin-top:10px;">Open</a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if is_admin %}
+  <!-- ADMIN SHORTCUT — only visible to developer -->
+  <div style="margin-bottom:20px;">
+    <a href="/admin" style="display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#1a0533,#2d0a4e);color:#c4b5fd;padding:14px 24px;border-radius:14px;font-weight:600;font-size:14px;border:1px solid rgba(167,139,250,0.25);box-shadow:0 4px 16px rgba(124,58,237,0.2);transition:all 0.25s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+      <span style="font-size:1.3rem;">⚙</span>
+      <div>
+        <div>Developer Admin Panel</div>
+        <div style="font-size:12px;color:rgba(196,181,253,0.6);font-weight:400;margin-top:2px;">Manage users, view stats, change roles</div>
+      </div>
+      <span style="margin-left:auto;opacity:0.5;">→</span>
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- POPULAR MATERIALS -->
+  <div class="card" style="margin-bottom:24px;">
+    <h2 style="margin-bottom:18px;">🔥 Popular Materials</h2>
+    {% if popular_materials %}
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        {% for item in popular_materials %}
+        <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;background:var(--bg-subtle);border-radius:var(--radius);border:1px solid var(--border);transition:var(--transition);" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='var(--bg-subtle)'">
+          <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{{ loop.index }}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.title }}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">⬇ {{ item.downloads }} downloads</div>
+          </div>
+          <a href="/download/{{ item.id }}" class="download-btn">View</a>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No materials yet</h3>
+        <p>Materials will appear here once teachers start uploading.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- QUICK ADD TASK -->
+  <div class="card" style="margin-bottom:24px;">
+    <h2 style="margin-bottom:18px;">⚡ Quick Add Task</h2>
+    <form method="POST" class="planner-form">
+      <div class="form-group" style="margin:0;">
+        <input name="title" placeholder="Task title" required>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <input name="description" placeholder="Description (optional)">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <input type="datetime-local" name="date" required>
+      </div>
+      <button class="btn" style="white-space:nowrap;">Add Task</button>
+    </form>
+  </div>
+
+  <!-- TASK GRID -->
+  <div class="dashboard-grid">
+    <div class="card">
+      <h2 style="margin-bottom:16px;">📅 Today's Tasks</h2>
+      {% if tasks_today %}
+        {% for task in tasks_today %}
+        <div class="task-card today-task" data-time="{{ task.date }}">
+          <strong>{{ task.title }}</strong>
+          {% if task.description %}<p>{{ task.description }}</p>{% endif %}
+          <span class="task-time">{{ task.date }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="padding:24px 0;">
+          <div class="empty-icon">🎉</div>
+          <p>No tasks for today!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom:16px;">🔴 Overdue Tasks</h2>
+      {% if overdue_tasks %}
+        {% for task in overdue_tasks %}
+        <div class="task-card overdue-task">
+          <strong>{{ task.title }}</strong>
+          {% if task.description %}<p>{{ task.description }}</p>{% endif %}
+          <span class="task-time">{{ task.date }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state" style="padding:24px 0;">
+          <div class="empty-icon">✅</div>
+          <p>No overdue tasks!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// Notification reminder
+if ("Notification" in window) Notification.requestPermission();
+setInterval(() => {
+  const now = new Date();
+  document.querySelectorAll(".today-task").forEach(card => {
+    const taskTime = new Date(card.dataset.time);
+    if (Math.abs(taskTime - now) < 10000 && !card.classList.contains("alerted")) {
+      card.classList.add("alerted");
+      if (Notification.permission === "granted") {
+        new Notification("📅 Task Reminder", { body: card.querySelector("strong").innerText });
+      }
+    }
+  });
+}, 10000);
+
+// Toast helper
+function showToast(msg, type='success') {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.innerHTML = (type==='success'?'✅':'❌') + ' ' + msg;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+</script>
+
+<!-- nav toggle handled by school.js -->
+
+<script src="{{ url_for('static', filename='school.js') }}"></script>
+
+<!-- BOTTOM TAB BAR (mobile) -->
+<nav class="bottom-nav">
+  <a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label">Home</span>
+  </a>
+  <a href="/classes" class="{% if '/classes' in request.path or '/grade' in request.path or '/subject' in request.path %}active{% endif %}">
+    <span class="tab-icon">📚</span>
+    <span class="tab-label">Classes</span>
+  </a>
+  <a href="/planner" class="{% if request.path == '/planner' %}active{% endif %}">
+    <span class="tab-icon">📅</span>
+    <span class="tab-label">Planner</span>
+  </a>
+  <a href="/notes" class="{% if request.path == '/notes' %}active{% endif %}">
+    <span class="tab-icon">📝</span>
+    <span class="tab-label">Notes</span>
+  </a>
+  <a href="/logout" class="tab-logout">
+    <span class="tab-icon">👋</span>
+    <span class="tab-label">Logout</span>
+  </a>
+</nav>
+</body>
+</html>

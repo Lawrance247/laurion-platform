@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <style>
+    .admin-header {
+      background: linear-gradient(135deg, #1a0533 0%, #2d0a4e 100%);
+      border-radius: var(--radius-xl);
+      padding: 36px 40px;
+      color: #fff;
+      margin-bottom: 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      border: 1px solid rgba(167,139,250,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .admin-header::before {
+      content: "";
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(167,139,250,0.15) 0%, transparent 70%);
+      right: -60px; top: -80px;
+    }
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(167,139,250,0.2);
+      color: #c4b5fd;
+      border: 1px solid rgba(167,139,250,0.35);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .admin-header h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    .admin-header p  { color: rgba(255,255,255,0.6); font-size: 14px; }
+
+    /* Stat cards */
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .admin-stat {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 24px 22px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xs);
+      position: relative;
+      overflow: hidden;
+    }
+    .admin-stat::after {
+      content: "";
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .admin-stat.purple::after { background: linear-gradient(90deg,#7c3aed,#a78bfa); }
+    .admin-stat.blue::after   { background: linear-gradient(90deg,#2563eb,#60a5fa); }
+    .admin-stat.gold::after   { background: linear-gradient(90deg,#d97706,#fbbf24); }
+    .admin-stat.green::after  { background: linear-gradient(90deg,#1a9e5c,#00e87a); }
+    .admin-stat .s-icon { font-size: 1.4rem; margin-bottom: 10px; }
+    .admin-stat h2 { font-size: 2rem; font-weight: 800; color: var(--secondary); line-height: 1; }
+    .admin-stat p  { font-size: 13px; color: var(--text-sub); margin-top: 4px; }
+
+    /* Search */
+    .admin-search {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .admin-search input {
+      flex: 1; min-width: 200px;
+      padding: 11px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 14px; outline: none;
+    }
+    .admin-search input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.12); }
+    .admin-search select {
+      padding: 11px 16px; border: 1.5px solid var(--border);
+      border-radius: var(--radius); font-size: 14px;
+      background: #fff; color: var(--text);
+      min-width: 140px;
+    }
+
+    /* User table */
+    .user-table-wrap {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #1a0533; }
+    thead th {
+      padding: 14px 18px;
+      text-align: left;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg-subtle); }
+    tbody td { padding: 14px 18px; font-size: 14px; color: var(--text); vertical-align: middle; }
+
+    /* Avatar */
+    .user-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: #fff;
+      font-weight: 700; font-size: 14px;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .user-cell { display: flex; align-items: center; gap: 12px; }
+    .user-name { font-weight: 600; }
+    .user-id   { font-size: 11px; color: var(--muted); }
+
+    /* Role badge */
+    .role-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    .role-student { background: rgba(37,99,235,0.1); color: #2563eb; }
+    .role-teacher { background: rgba(217,119,6,0.1);  color: #d97706; }
+    .role-admin   { background: rgba(124,58,237,0.1); color: #7c3aed; }
+
+    /* Actions */
+    .action-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .role-form  { display: flex; gap: 6px; align-items: center; }
+    .role-form select {
+      padding: 6px 10px; border-radius: 8px;
+      border: 1.5px solid var(--border);
+      font-size: 12.5px; background: #fff;
+      color: var(--text); min-width: 110px;
+    }
+    .btn-role {
+      padding: 6px 14px; border-radius: 8px;
+      background: rgba(124,58,237,0.1);
+      color: #7c3aed;
+      border: 1px solid rgba(124,58,237,0.25);
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-role:hover { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+    .btn-del {
+      padding: 6px 14px; border-radius: 8px;
+      background: rgba(239,68,68,0.08);
+      color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.2);
+      font-size: 12.5px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-del:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+
+    /* Confirm overlay */
+    .confirm-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 500;
+      align-items: center; justify-content: center; padding: 24px;
+      backdrop-filter: blur(6px);
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box {
+      background: #fff; border-radius: 20px; padding: 36px;
+      max-width: 400px; width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: popIn 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes popIn {
+      from { opacity:0; transform:scale(0.9) translateY(16px); }
+      to   { opacity:1; transform:scale(1) translateY(0); }
+    }
+    .confirm-box h3 { font-size: 1.2rem; color: var(--secondary); margin-bottom: 10px; }
+    .confirm-box p  { font-size: 14px; color: var(--text-sub); margin-bottom: 24px; line-height: 1.6; }
+    .confirm-actions { display: flex; gap: 12px; }
+    .confirm-actions button { flex: 1; padding: 12px; border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }
+    .confirm-cancel { background: var(--bg-subtle); color: var(--text); border: 1.5px solid var(--border) !important; }
+    .confirm-cancel:hover { background: var(--border); }
+    .confirm-delete { background: #ef4444; color: #fff; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+    .confirm-delete:hover { background: #dc2626; }
+
+    @media (max-width: 768px) {
+      .admin-header { padding: 24px 20px; }
+      .admin-header h1 { font-size: 1.4rem; }
+      table, thead, tbody, tr, th, td { display: block; }
+      thead { display: none; }
+      tbody td {
+        padding: 8px 16px;
+        border: none;
+        font-size: 13px;
+      }
+      tbody td::before {
+        content: attr(data-label);
+        font-size: 10px; font-weight: 700;
+        color: var(--muted); text-transform: uppercase;
+        letter-spacing: 0.06em; display: block; margin-bottom: 3px;
+      }
+      tbody tr {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
+  <div class="nav-links" style="display:flex;">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/admin" style="color:#c4b5fd;font-weight:700;">⚙ Admin</a>
+    <a href="/logout">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="admin-header">
+    <div style="position:relative;z-index:1;">
+      <div class="admin-badge">⚙ Developer Admin Panel</div>
+      <h1>Laurion Admin</h1>
+      <p>Full control over users, roles, and platform data.</p>
+    </div>
+    <a href="/dashboard" class="btn" style="background:rgba(255,255,255,0.12);box-shadow:none;border:1px solid rgba(255,255,255,0.2);position:relative;z-index:1;">← Dashboard</a>
+  </div>
+
+  <!-- STATS -->
+  <div class="admin-stats">
+    <div class="admin-stat purple">
+      <div class="s-icon">👥</div>
+      <h2>{{ user_count }}</h2>
+      <p>Total users</p>
+    </div>
+    <div class="admin-stat blue">
+      <div class="s-icon">🎓</div>
+      <h2>{{ student_count }}</h2>
+      <p>Students</p>
+    </div>
+    <div class="admin-stat gold">
+      <div class="s-icon">👨‍🏫</div>
+      <h2>{{ teacher_count }}</h2>
+      <p>Teachers</p>
+    </div>
+    <div class="admin-stat green">
+      <div class="s-icon">📁</div>
+      <h2>{{ mat_count }}</h2>
+      <p>Materials uploaded</p>
+    </div>
+    <div class="admin-stat green">
+      <div class="s-icon">⬇️</div>
+      <h2>{{ total_downloads }}</h2>
+      <p>Total downloads</p>
+    </div>
+  </div>
+
+  <!-- SEARCH + FILTER -->
+  <div class="admin-search">
+    <input type="text" id="userSearch" placeholder="🔍  Search by username...">
+    <select id="roleFilter">
+      <option value="">All roles</option>
+      <option value="student">Students</option>
+      <option value="teacher">Teachers</option>
+      <option value="admin">Admins</option>
+    </select>
+    <span style="font-size:13px;color:var(--muted);">{{ user_count }} users total</span>
+  </div>
+
+  <!-- USER TABLE -->
+  <div class="user-table-wrap">
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr data-username="{{ user.username }}" data-role="{{ user.role }}">
+          <td data-label="User">
+            <div class="user-cell">
+              <div class="user-avatar">{{ user.username[0].upper() }}</div>
+              <div>
+                <div class="user-name">{{ user.username }}</div>
+                <div class="user-id">#{{ user.id }}</div>
+              </div>
+            </div>
+          </td>
+          <td data-label="Role">
+            <span class="role-badge role-{{ user.role }}">{{ user.role }}</span>
+          </td>
+          <td data-label="Actions">
+            <div class="action-row">
+              {% if user.username != session.get('user') %}
+              <!-- Change role -->
+              <form method="POST" action="/admin/change-role/{{ user.id }}" class="role-form">
+                <select name="role">
+                  <option value="student" {% if user.role=='student' %}selected{% endif %}>Student</option>
+                  <option value="teacher" {% if user.role=='teacher' %}selected{% endif %}>Teacher</option>
+                  <option value="admin"   {% if user.role=='admin'   %}selected{% endif %}>Admin</option>
+                </select>
+                <button type="submit" class="btn-role">Save</button>
+              </form>
+              <!-- Delete -->
+              <button class="btn-del"
+                onclick="confirmDelete('{{ user.id }}', '{{ user.username }}')">
+                🗑 Delete
+              </button>
+              {% else %}
+              <span style="font-size:13px;color:var(--muted);font-style:italic;">You (admin)</span>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <h3>🗑 Delete user?</h3>
+    <p id="confirmText">Are you sure? This will permanently delete the user and all their tasks, notes, and uploaded materials.</p>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <form id="deleteForm" method="POST" style="flex:1;">
+        <button type="submit" class="confirm-delete" style="width:100%;">Yes, delete</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Confirm delete modal ──────────────────────────────────────────────────────
+function confirmDelete(id, username) {
+  document.getElementById("confirmText").textContent =
+    `Delete "${username}"? This removes their account, all tasks, notes, and any uploaded materials permanently.`;
+  document.getElementById("deleteForm").action = "/admin/delete-user/" + id;
+  document.getElementById("confirmOverlay").classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+function closeConfirm() {
+  document.getElementById("confirmOverlay").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.getElementById("confirmOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeConfirm();
+});
+
+// ── Search + filter ───────────────────────────────────────────────────────────
+const searchInput  = document.getElementById("userSearch");
+const roleFilter   = document.getElementById("roleFilter");
+const rows         = document.querySelectorAll("#userTable tbody tr");
+
+function filterUsers() {
+  const q    = searchInput.value.toLowerCase();
+  const role = roleFilter.value;
+  rows.forEach(row => {
+    const nameMatch = row.dataset.username.toLowerCase().includes(q);
+    const roleMatch = !role || row.dataset.role === role;
+    row.style.display = nameMatch && roleMatch ? "" : "none";
+  });
+}
+searchInput.addEventListener("input", filterUsers);
+roleFilter.addEventListener("change", filterUsers);
+</script>
+
+</body>
+</html>

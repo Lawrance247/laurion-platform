@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline — Laurion</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500&display=swap');
+    :root { --green:#1a9e5c; --navy:#0b1f3a; --lime:#00e87a; }
+    *{ margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'DM Sans',sans-serif;
+      background:var(--navy);
+      color:#fff;
+      min-height:100vh;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      text-align:center;
+    }
+    img { width:80px; margin-bottom:24px; filter:drop-shadow(0 8px 24px rgba(26,158,92,0.4)); }
+    h1 { font-family:'Sora',sans-serif; font-size:1.8rem; margin-bottom:10px; }
+    h1 span { color:var(--lime); }
+    .sub { color:rgba(255,255,255,0.6); font-size:15px; line-height:1.65; max-width:360px; margin-bottom:28px; }
+    .card {
+      background:rgba(255,255,255,0.05);
+      border:1px solid rgba(255,255,255,0.1);
+      border-radius:18px;
+      padding:24px 28px;
+      max-width:400px;
+      width:100%;
+      margin-bottom:16px;
+      text-align:left;
+    }
+    .card h3 { font-family:'Sora',sans-serif; font-size:0.85rem; color:var(--lime); margin-bottom:14px; text-transform:uppercase; letter-spacing:0.08em; }
+    .card ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .card li { font-size:14px; color:rgba(255,255,255,0.75); display:flex; align-items:center; gap:10px; }
+    .card li::before { content:"✓"; color:var(--lime); font-weight:700; flex-shrink:0; }
+    .card li.no::before { content:"✗"; color:rgba(255,100,100,0.8); }
+    .btns { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:8px; }
+    .btn { display:inline-flex; align-items:center; gap:8px; background:var(--green); color:#fff; padding:12px 24px; border-radius:12px; font-family:'Sora',sans-serif; font-weight:600; font-size:14px; border:none; cursor:pointer; transition:all 0.25s; }
+    .btn:hover { background:#13804a; transform:translateY(-2px); }
+    .btn-ghost { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15); }
+    .status { font-size:13px; color:rgba(255,255,255,0.35); margin-top:24px; display:flex; align-items:center; gap:8px; justify-content:center; }
+    .dot { width:8px; height:8px; border-radius:50%; background:#ef4444; flex-shrink:0; animation:pulse 1.5s ease-in-out infinite; }
+    .dot.online { background:var(--lime); animation:none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  </style>
+</head>
+<body>
+  <img src="/static/images/logo.png" alt="Laurion" onerror="this.style.display='none'">
+  <h1>You're <span>offline</span></h1>
+  <p class="sub">No internet right now — but Laurion keeps working. Here's what you can still do:</p>
+
+  <div class="card">
+    <h3>✅ Available offline</h3>
+    <ul>
+      <li>Pages you've already visited</li>
+      <li>Study materials you've opened before</li>
+      <li>Your planner and saved tasks</li>
+      <li>Write notes — saves locally, syncs later</li>
+      <li>Add tasks — syncs when back online</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>⚠ Needs internet</h3>
+    <ul>
+      <li class="no">Pages you've never visited</li>
+      <li class="no">Downloading new materials</li>
+      <li class="no">Uploading files (teachers)</li>
+    </ul>
+  </div>
+
+  <div class="btns">
+    <button class="btn" onclick="window.location.reload()">↻ Try again</button>
+    <button class="btn btn-ghost" onclick="history.back()">← Go back</button>
+  </div>
+
+  <div class="status">
+    <div class="dot" id="dot"></div>
+    <span id="statusText">Checking connection...</span>
+  </div>
+
+  <script>
+    function update() {
+      var dot = document.getElementById("dot");
+      var txt = document.getElementById("statusText");
+      if (navigator.onLine) {
+        dot.classList.add("online");
+        txt.textContent = "Connection restored — tap Try Again";
+      } else {
+        dot.classList.remove("online");
+        txt.textContent = "No internet connection";
+      }
+    }
+    update();
+    window.addEventListener("online",  function() { update(); setTimeout(function(){ window.location.reload(); }, 1000); });
+    window.addEventListener("offline", update);
+  </script>
+</body>
+</html>

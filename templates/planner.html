@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+  <title>Planner — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+  <div class="nav-links">
+    <button class="nav-close" aria-label="Close menu">✕</button>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/classes">Classes</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">+ Upload</a>
+    {% endif %}
+    {% if session.get('user') == 'admin' or session.get('role') == 'admin' %}
+    <a href="/admin" style="color:#c4b5fd;font-weight:700;">⚙ Admin</a>
+    {% endif %}
+    <a href="/logout">Logout</a>
+  </div>
+</nav>
+
+<div class="planner-wrapper">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:24px;">
+    <h1>My Planner 📅</h1>
+    <div class="calendar-controls">
+      <button onclick="setView('month')" id="monthBtn" class="active">Month</button>
+      <button onclick="setView('week')"  id="weekBtn">Week</button>
+    </div>
+  </div>
+
+  <!-- ADD TASK -->
+  <div class="planner-card">
+    <h3 style="font-size:1rem;color:var(--text-sub);margin-bottom:14px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Add a Task</h3>
+    <form method="POST" data-offline="task" style="display:grid;grid-template-columns:1fr 1fr auto auto;gap:12px;align-items:end;">
+      <div>
+        <input name="title" placeholder="Task title" required>
+      </div>
+      <div>
+        <input name="description" placeholder="Description (optional)">
+      </div>
+      <div>
+        <input type="datetime-local" name="date" required>
+      </div>
+      <button class="btn">+ Add</button>
+    </form>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="calendarContainer" class="calendar month-view">
+    {% for day in range(1, 32) %}
+    <div class="calendar-day" onclick="showTasks('{{ day }}')" data-day="{{ day }}">
+      <div class="day-number">{{ day }}</div>
+      {% for task in tasks %}
+        {% if task.date and task.date.day == day %}
+        <div class="calendar-task">{{ task.title }}</div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- TASK PANEL -->
+  <div class="task-panel">
+    <h3>Tasks for selected day</h3>
+    <div id="taskList"><p style="color:var(--muted);font-size:14px;">Click a day to view tasks</p></div>
+  </div>
+
+  <!-- FULL TASK LIST -->
+  <div class="card" style="margin-top:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h2>All Tasks</h2>
+      <span style="font-size:13px;color:var(--muted);">{{ tasks|length }} task{% if tasks|length != 1 %}s{% endif %}</span>
+    </div>
+    {% if tasks %}
+      {% for task in tasks %}
+      <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--bg-subtle);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:10px;transition:var(--transition);">
+        <div style="flex:1;">
+          <div style="font-size:14.5px;font-weight:600;color:var(--text);">{{ task.title }}</div>
+          {% if task.description %}<div style="font-size:13px;color:var(--text-sub);margin-top:2px;">{{ task.description }}</div>{% endif %}
+          <span class="task-time">{{ task.date }}</span>
+        </div>
+        <a href="/delete_task/{{ task.id }}" class="delete-btn btn-sm"
+           onclick="return confirm('Delete this task?')">🗑</a>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:32px 0;">
+        <div class="empty-icon">📋</div>
+        <p>No tasks yet. Add one above!</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+const tasks = [
+  {% for task in tasks %}
+  {
+    title: {{ task.title|tojson }},
+    description: {{ task.description|tojson }},
+    date: "{{ task.date.isoformat() if task.date else '' }}",
+    id: {{ task.id }}
+  }{% if not loop.last %},{% endif %}
+  {% endfor %}
+];
+
+const today = new Date();
+const todayDate = today.getDate();
+
+function setView(view) {
+  const container = document.getElementById("calendarContainer");
+  container.classList.remove("month-view","week-view");
+  container.classList.add(view + "-view");
+  document.getElementById("monthBtn").classList.remove("active");
+  document.getElementById("weekBtn").classList.remove("active");
+  document.getElementById(view + "Btn").classList.add("active");
+  view === "week" ? showWeek() : showMonth();
+}
+
+function showWeek() {
+  const days = document.querySelectorAll(".calendar-day");
+  const s = todayDate - 3, e = todayDate + 3;
+  days.forEach(d => {
+    d.style.display = parseInt(d.dataset.day) >= s && parseInt(d.dataset.day) <= e ? "block" : "none";
+  });
+}
+
+function showMonth() {
+  document.querySelectorAll(".calendar-day").forEach(d => d.style.display = "block");
+}
+
+function showTasks(day) {
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+  document.querySelectorAll(".calendar-day").forEach(d => d.classList.remove("active-day"));
+  document.querySelector(`[data-day='${day}']`).classList.add("active-day");
+  const filtered = tasks.filter(t => {
+  if (!t.date) return false;
+  const d = new Date(t.date);
+  return d.getDate() === parseInt(day);
+});
+  if (!filtered.length) { list.innerHTML = '<p style="color:var(--muted);font-size:14px;">No tasks for this day.</p>'; return; }
+  filtered.forEach(task => {
+    list.innerHTML += `<div class="task-item"><h4>${task.title}</h4>${task.description ? '<p>' + task.description + '</p>' : ''}</div>`;
+  });
+}
+
+window.onload = () => {
+  const el = document.querySelector(`[data-day='${todayDate}']`);
+  if (el) el.classList.add("today");
+};
+
+setTimeout(() => {
+  if ("Notification" in window && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+}, 5000);
+</script>
+
+<!-- nav toggle handled by school.js -->
+
+<script src="{{ url_for('static', filename='school.js') }}"></script>
+
+<!-- BOTTOM TAB BAR (mobile) -->
+<nav class="bottom-nav">
+  <a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label">Home</span>
+  </a>
+  <a href="/classes" class="{% if '/classes' in request.path or '/grade' in request.path or '/subject' in request.path %}active{% endif %}">
+    <span class="tab-icon">📚</span>
+    <span class="tab-label">Classes</span>
+  </a>
+  <a href="/planner" class="{% if request.path == '/planner' %}active{% endif %}">
+    <span class="tab-icon">📅</span>
+    <span class="tab-label">Planner</span>
+  </a>
+  <a href="/notes" class="{% if request.path == '/notes' %}active{% endif %}">
+    <span class="tab-icon">📝</span>
+    <span class="tab-label">Notes</span>
+  </a>
+  <a href="/logout" class="tab-logout">
+    <span class="tab-icon">👋</span>
+    <span class="tab-label">Logout</span>
+  </a>
+</nav>
+</body>
+</html>

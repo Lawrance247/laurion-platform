@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+  <title>{{ subject }} — Grade {{ grade }} — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+  <div class="nav-links">
+    <button class="nav-close" aria-label="Close menu">✕</button>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/classes">Classes</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">+ Upload</a>
+    {% endif %}
+    {% if session.get('user') == 'admin' or session.get('role') == 'admin' %}
+    <a href="/admin" style="color:#c4b5fd;font-weight:700;">⚙ Admin</a>
+    {% endif %}
+    <a href="/logout">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div style="margin-bottom:8px;">
+    <a href="/grade/{{ grade }}" style="font-size:13px;color:var(--text-sub);display:inline-flex;align-items:center;gap:5px;">← Back to Grade {{ grade }}</a>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:24px;">
+      <div>
+        <div class="badge">Grade {{ grade }}</div>
+        <h1 style="font-size:1.8rem;color:var(--secondary);">{{ subject }}</h1>
+        <p style="color:var(--text-sub);font-size:14px;margin-top:4px;">{{ materials|length }} material{% if materials|length != 1 %}s{% endif %} available</p>
+      </div>
+      <a href="/notes?subject={{ code }}&grade={{ grade }}" class="btn">📝 Write Notes</a>
+    </div>
+
+    <div class="material-grid">
+      {% if materials %}
+        {% for item in materials %}
+        <div class="material-card">
+          <div class="material-icon">{{ get_file_icon(item.filename) }}</div>
+          <div class="material-info">
+            <h3>{{ item.title }}</h3>
+            <p>Grade {{ item.grade }} &bull; {{ subject }}</p>
+            <span class="download-count">⬇ {{ item.downloads }} downloads</span>
+          </div>
+          <a href="/download/{{ item.id }}" class="download-btn">⬇ Download</a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <h3>No materials yet</h3>
+          <p>Materials for {{ subject }} Grade {{ grade }} will appear here once uploaded by a teacher.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+<!-- nav toggle handled by school.js -->
+
+<script src="{{ url_for('static', filename='school.js') }}"></script>
+
+<!-- BOTTOM TAB BAR (mobile) -->
+<nav class="bottom-nav">
+  <a href="/dashboard" class="{% if request.path == '/dashboard' %}active{% endif %}">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label">Home</span>
+  </a>
+  <a href="/classes" class="{% if '/classes' in request.path or '/grade' in request.path or '/subject' in request.path %}active{% endif %}">
+    <span class="tab-icon">📚</span>
+    <span class="tab-label">Classes</span>
+  </a>
+  <a href="/planner" class="{% if request.path == '/planner' %}active{% endif %}">
+    <span class="tab-icon">📅</span>
+    <span class="tab-label">Planner</span>
+  </a>
+  <a href="/notes" class="{% if request.path == '/notes' %}active{% endif %}">
+    <span class="tab-icon">📝</span>
+    <span class="tab-label">Notes</span>
+  </a>
+  <a href="/logout" class="tab-logout">
+    <span class="tab-icon">👋</span>
+    <span class="tab-label">Logout</span>
+  </a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+  <title>Laurion — Smart Learning Platform</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion">
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+  <div class="nav-links">
+    <button class="nav-close" aria-label="Close menu">✕</button>
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="#who">Who uses Laurion</a>
+    <a href="/login" class="btn-outline">Log in</a>
+    <a href="/register" class="btn">Get started →</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="badge">✦ Smart Learning Platform</div>
+    <h1>Study smarter.<br><span>Achieve more.</span></h1>
+    <p>Quality study materials for grades 8–12, organised by subject and uploaded by real teachers — all in one place.</p>
+  <div class="hero-buttons">
+    <button id="installBtn" class="btn" onclick="triggerInstall()">
+      📲 Install App
+    </button>
+    <a href="/register" class="btn" id="registerBtn">Start for free →</a>
+    <a href="/login" class="btn-outline">Log in</a>
+  </div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-circle"></div>
+    <img src="{{ url_for('static', filename='images/logoo.png') }}" class="hero-image" alt="Laurion">
+    <div class="floating icon1">📚</div>
+    <div class="floating icon2">🎓</div>
+  </div>
+</section>
+
+
+
+<!-- HOW IT WORKS -->
+<section class="section-muted" id="how">
+  <div class="container">
+    <h2 class="section-title">How it works</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">👤</div>
+        <h3>1. Create account</h3>
+        <p>Sign up as a student or teacher in seconds. No credit card needed — always free.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">📂</div>
+        <h3>2. Choose your subject</h3>
+        <p>Browse by grade and subject. Find exactly what you need without the noise.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">⬇️</div>
+        <h3>3. Access materials</h3>
+        <p>Download notes, past papers, and resources uploaded by your teachers instantly.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <h2 class="section-title">Why Laurion?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">📚</div>
+        <h3>Organised Content</h3>
+        <p>Everything structured by grade and subject so you always know where to look.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">📅</div>
+        <h3>Built-in Planner</h3>
+        <p>Create tasks, set deadlines, and get notified — all without leaving the platform.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">📝</div>
+        <h3>Smart Notes</h3>
+        <p>Write notes linked to your subject and grade, then export as PDF or TXT anytime.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">⚡</div>
+        <h3>Fast Uploads</h3>
+        <p>Teachers share materials instantly with drag-and-drop upload and live tracking.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">📊</div>
+        <h3>Download Insights</h3>
+        <p>Teachers see which resources are most used, so they know what students need most.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">🔒</div>
+        <h3>Secure & Private</h3>
+        <p>Role-based access ensures students and teachers see only what's relevant to them.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO -->
+<section id="who" class="section-light">
+  <div class="container">
+    <h2 class="section-title">Who uses Laurion</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">🎓</div>
+        <h3>Students</h3>
+        <p>Access organised study materials, manage your tasks, and write notes — all in one focused space.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">👨‍🏫</div>
+        <h3>Teachers</h3>
+        <p>Upload resources, manage your materials, and track exactly how many students download each file.</p>
+      </div>
+      <div class="feature-card">
+        <div style="font-size:2rem;margin-bottom:14px;">📈</div>
+        <h3>Self-learners</h3>
+        <p>Take full control of your learning journey anytime, anywhere — no classroom required.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="container">
+    <h2>Start your learning journey today 🚀</h2>
+    <p style="color:rgba(255,255,255,0.65);font-size:16px;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">Join thousands of students and teachers already using Laurion.</p>
+    <a href="/register" class="btn" style="padding:14px 36px;font-size:16px;">Create Free Account →</a>
+  </div>
+</section>
+
+<!-- Install instructions modal (shown when native prompt not available) -->
+<div id="installModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:500;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px);">
+  <div style="background:#0d2640;border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:36px;max-width:420px;width:100%;position:relative;">
+    <button onclick="hideInstallModal()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.1);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;">✕</button>
+    <h3 style="font-family:'Sora',sans-serif;color:#fff;font-size:1.3rem;margin-bottom:8px;">📲 Install Laurion</h3>
+    <p style="color:rgba(255,255,255,0.6);font-size:14px;margin-bottom:24px;line-height:1.6;">Follow these steps to install Laurion on your Android phone:</p>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#1a9e5c;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+        <div style="font-size:13.5px;color:rgba(255,255,255,0.8);line-height:1.5;">Open this page in <strong style="color:#fff;">Google Chrome</strong> on your Android phone</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#1a9e5c;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+        <div style="font-size:13.5px;color:rgba(255,255,255,0.8);line-height:1.5;">Tap the <strong style="color:#fff;">⋮ menu</strong> (three dots, top right)</div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#1a9e5c;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+        <div style="font-size:13.5px;color:rgba(255,255,255,0.8);line-height:1.5;">Tap <strong style="color:#fff;">"Add to Home screen"</strong> or <strong style="color:#fff;">"Install app"</strong></div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:rgba(255,255,255,0.05);border-radius:12px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:#1a9e5c;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+        <div style="font-size:13.5px;color:rgba(255,255,255,0.8);line-height:1.5;">Tap <strong style="color:#fff;">Install</strong> — Laurion appears on your home screen ✅</div>
+      </div>
+    </div>
+    <button onclick="hideInstallModal()" style="width:100%;background:#1a9e5c;color:#fff;border:none;padding:13px;border-radius:12px;font-weight:600;font-size:15px;cursor:pointer;">Got it!</button>
+  </div>
+</div>
+
+<div id="installBanner" class="install-banner">
+  <div>
+    <strong>Install Laurion</strong>
+    <p>Study offline. No data needed.</p>
+  </div>
+  <button onclick="triggerInstall()">Install</button>
+  <span onclick="dismissBanner()" style="cursor:pointer;">✕</span>
+</div>
+
+<!-- nav toggle handled by school.js -->
+
+
+<script>
+// ── PWA INSTALL MANAGER ───────────────────────────────────────────────────────
+var deferredPrompt  = null;
+var isInstalled     = localStorage.getItem("appInstalled") === "true"
+                   || window.matchMedia("(display-mode: standalone)").matches
+                   || window.navigator.standalone === true;
+
+function setInstallBtnLabel(label, enabled) {
+  var btn = document.getElementById("installBtn");
+  if (!btn) return;
+  btn.textContent = label;
+  btn.disabled    = !enabled;
+  btn.style.opacity = enabled ? "1" : "0.7";
+}
+
+function showInstallModal() {
+  // Show step-by-step instructions when native prompt is not available
+  var modal = document.getElementById("installModal");
+  if (modal) {
+    modal.style.display = "flex";
+  }
+}
+
+function hideInstallModal() {
+  var modal = document.getElementById("installModal");
+  if (modal) modal.style.display = "none";
+}
+
+async function triggerInstall() {
+  if (isInstalled) {
+    setInstallBtnLabel("✅ Already Installed", false);
+    return;
+  }
+  if (deferredPrompt) {
+    // Native Chrome prompt available — use it
+    deferredPrompt.prompt();
+    var choice = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    if (choice.outcome === "accepted") {
+      setInstallBtnLabel("✅ Installed!", false);
+    }
+  } else {
+    // No native prompt — show manual instructions
+    showInstallModal();
+  }
+}
+
+function dismissBanner() {
+  var banner = document.getElementById("installBanner");
+  if (banner) banner.style.display = "none";
+  localStorage.setItem("installDismissed", "true");
+}
+
+// Chrome / Edge fires this when PWA install is available
+window.addEventListener("beforeinstallprompt", function (e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Update button to show native install is ready
+  setInstallBtnLabel("📲 Install App", true);
+  // Show bottom banner after 5 seconds if not dismissed
+  setTimeout(function () {
+    if (!isInstalled && !localStorage.getItem("installDismissed")) {
+      var banner = document.getElementById("installBanner");
+      if (banner && window.scrollY < 300) {
+        banner.style.display = "flex";
+      }
+    }
+  }, 5000);
+});
+
+window.addEventListener("appinstalled", function () {
+  isInstalled = true;
+  localStorage.setItem("appInstalled", "true");
+  setInstallBtnLabel("✅ Installed!", false);
+  var banner = document.getElementById("installBanner");
+  if (banner) banner.style.display = "none";
+  incrementInstall();
+});
+
+// Handle already-installed state on load
+if (isInstalled) {
+  document.addEventListener("DOMContentLoaded", function () {
+    setInstallBtnLabel("✅ Already Installed", false);
+  });
+}
+</script>
+
+<script>
+function cacheInstallCount(count) {
+}
+
+function getCachedInstallCount() {
+}
+
+async function loadInstallCount() {
+
+  try {
+    const res = await fetch("/install-count");
+    const data = await res.json();
+
+    cacheInstallCount(data.count);
+
+    if (el) {
+      el.innerText =
+        "🔥 " + data.count.toLocaleString() + " students are already using Laurion";
+    }
+
+  } catch {
+    const cached = getCachedInstallCount();
+
+    if (el) {
+      if (cached) {
+        el.innerText =
+          "🔥 " + parseInt(cached).toLocaleString() + " students are already using Laurion";
+      } else {
+        el.innerText =
+          "🔥 Thousands of students using Laurion";
+      }
+    }
+  }
+}
+
+async function incrementInstall() {
+  try {
+    await fetch("/increment-install", { method: "POST" });
+  } catch {}
+}
+
+// load immediately
+loadInstallCount();
+</script>
+
+<script src="{{ url_for('static', filename='school.js') }}"></script>
+</body>
+</html>

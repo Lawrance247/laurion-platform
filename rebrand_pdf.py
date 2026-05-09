@@ -31,8 +31,8 @@ from reportlab.lib.utils import ImageReader
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 PORTAL_NAME    = "Laurion"
-PORTAL_TAGLINE = "Your Leading Exam Resource Portal"
-PORTAL_URL     = "www.laurion.co.za"
+PORTAL_TAGLINE = "Education Made Accessible"
+PORTAL_URL     = "https://laurionsolution.onrender.com"
 
 SCRIPT_DIR = Path(__file__).parent
 LOGO_PATH  = SCRIPT_DIR / "new_logo.png"
@@ -135,7 +135,7 @@ def _build_cover_bytes() -> bytes:
 
     c.setFont("Helvetica-Bold", 12)
     c.setFillColorRGB(0, 0, 0)
-    c.drawCentredString(w / 2, text_y - 110, "Your Leading Past Year Exam Paper Resource Portal")
+    c.drawCentredString(w / 2, text_y - 110, "Education Made Accessible")
 
     c.setFillColorRGB(0.13, 0.46, 0.71)
     c.setFont("Helvetica", 11)

@@ -3,4 +3,4 @@ instance/
 static/uploads/
 __pycache__/
 *.pyc
-.env
+.envvenv/ 

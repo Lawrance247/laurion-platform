@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+  <title>Apply — NSFAS & Universities | Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
+  <style>
+    /* ── APPLY PAGE STYLES ── */
+    .apply-hero {
+      background: linear-gradient(145deg, #0b1f3a 0%, #1a3c5e 45%, #0d2d1a 100%);
+      padding: 80px 48px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .apply-hero::before {
+      content: "";
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,158,92,0.15) 0%, transparent 70%);
+      top: -200px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .apply-hero h1 {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      color: #fff;
+      margin-bottom: 16px;
+      position: relative; z-index: 1;
+    }
+    .apply-hero h1 span {
+      background: linear-gradient(135deg, #00e87a, #22c570);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .apply-hero p {
+      color: rgba(255,255,255,0.72);
+      font-size: 16px; max-width: 580px;
+      margin: 0 auto 32px;
+      line-height: 1.7;
+      position: relative; z-index: 1;
+    }
+    .apply-hero .badge { justify-content: center; position: relative; z-index: 1; }
+
+    /* TAB NAV */
+    .tab-nav {
+      display: flex;
+      gap: 0;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      padding: 6px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      max-width: 600px;
+      margin: 0 auto 36px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 11px 20px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Sora', sans-serif;
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: var(--transition);
+      background: transparent;
+      color: var(--text-sub);
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(26,158,92,0.35);
+    }
+    .tab-btn:not(.active):hover { background: var(--bg-subtle); color: var(--text); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* SECTION HEADINGS */
+    .section-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 28px;
+    }
+    .section-header .icon-wrap {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    .icon-green { background: rgba(26,158,92,0.12); }
+    .icon-blue  { background: rgba(11,34,64,0.1); }
+    .section-header h2 { font-size: 1.4rem; color: var(--secondary); }
+    .section-header p  { font-size: 13.5px; color: var(--text-sub); margin-top: 3px; }
+
+    /* STEP CARDS */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 32px;
+    }
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      position: relative;
+      transition: var(--transition);
+      overflow: hidden;
+    }
+    .step-card::before {
+      content: "";
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.35s ease;
+    }
+    .step-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .step-card:hover::before { transform: scaleX(1); }
+    .step-num {
+      width: 32px; height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff; font-family: 'Sora', sans-serif;
+      font-weight: 800; font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 14px;
+    }
+    .step-card h3 { font-size: 1rem; color: var(--secondary); margin-bottom: 8px; }
+    .step-card p  { font-size: 13.5px; color: var(--text-sub); line-height: 1.6; }
+
+    /* DOCS CHECKLIST */
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .doc-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      transition: var(--transition);
+    }
+    .doc-item:hover { border-color: var(--primary); background: rgba(26,158,92,0.03); }
+    .doc-icon {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: rgba(26,158,92,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .doc-item h4 { font-size: 13.5px; color: var(--secondary); margin-bottom: 3px; font-weight: 700; }
+    .doc-item p  { font-size: 12px; color: var(--muted); }
+
+    /* UNIVERSITIES TABLE */
+    .uni-search-wrap {
+      display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap;
+    }
+    .uni-search-wrap input,
+    .uni-search-wrap select {
+      flex: 1; min-width: 180px;
+      margin: 0;
+    }
+    .uni-list { display: flex; flex-direction: column; gap: 14px; }
+    .uni-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+    .uni-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+    .uni-card-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 24px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .uni-logo {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+      font-weight: 800; color: #fff;
+      font-family: 'Sora', sans-serif;
+    }
+    .uni-card-header h3 { font-size: 1rem; color: var(--secondary); }
+    .uni-card-header .uni-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .uni-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+    .uni-tag {
+      font-size: 11px; font-weight: 600;
+      padding: 3px 10px; border-radius: 99px;
+      background: rgba(26,158,92,0.1);
+      color: var(--primary);
+    }
+    .uni-tag.blue {
+      background: rgba(11,34,64,0.08);
+      color: var(--secondary);
+    }
+    .uni-chevron {
+      margin-left: auto; color: var(--muted);
+      font-size: 1.2rem;
+      transition: transform 0.28s;
+      flex-shrink: 0;
+    }
+    .uni-card.open .uni-chevron { transform: rotate(180deg); }
+    .uni-card-body {
+      display: none;
+      padding: 0 24px 22px;
+      border-top: 1px solid var(--border);
+    }
+    .uni-card.open .uni-card-body { display: block; }
+    .courses-label {
+      font-size: 12px; font-weight: 700;
+      color: var(--muted); letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin: 14px 0 10px;
+    }
+    .courses-grid-mini {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    .course-chip {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 14px;
+      background: var(--bg-subtle);
+      border-radius: 10px;
+      font-size: 13px; color: var(--text);
+      border: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    .course-chip:hover { border-color: var(--primary); background: rgba(26,158,92,0.05); }
+    .course-chip .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--primary);
+      flex-shrink: 0;
+    }
+    .uni-card-actions {
+      display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
+    }
+    .btn-sm {
+      padding: 8px 18px;
+      font-size: 13px;
+      border-radius: 10px;
+    }
+
+    /* HELP CTA */
+    .help-cta {
+      background: linear-gradient(135deg, var(--secondary) 0%, #0d3d2a 100%);
+      border-radius: var(--radius-xl);
+      padding: 48px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-top: 40px;
+    }
+    .help-cta::before {
+      content: "";
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,158,92,0.2) 0%, transparent 70%);
+      top: -100px; right: -80px;
+      pointer-events: none;
+    }
+    .help-cta h2 {
+      font-size: 1.9rem; color: #fff;
+      margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+    .help-cta p {
+      color: rgba(255,255,255,0.7);
+      font-size: 15px; max-width: 500px;
+      margin: 0 auto 28px;
+      line-height: 1.7;
+      position: relative; z-index: 1;
+    }
+    .help-cta .btn { position: relative; z-index: 1; }
+    .wa-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: #25D366;
+      color: #fff !important;
+      padding: 14px 30px;
+      border-radius: var(--radius);
+      font-family: 'Sora', sans-serif;
+      font-weight: 700; font-size: 15px;
+      box-shadow: 0 6px 24px rgba(37,211,102,0.4);
+      transition: var(--transition);
+      border: none; cursor: pointer;
+    }
+    .wa-btn:hover {
+      background: #1fb858;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 32px rgba(37,211,102,0.5);
+    }
+
+    /* APPLY MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 500;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--bg-card);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      max-width: 520px; width: 100%;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(0.9) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: none;
+      background: var(--bg-subtle);
+      color: var(--muted);
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .modal-close:hover { background: #fef2f2; color: #ef4444; }
+    .modal-box h2 { font-size: 1.5rem; color: var(--secondary); margin-bottom: 6px; }
+    .modal-box .modal-sub { font-size: 13.5px; color: var(--text-sub); margin-bottom: 24px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-weight: 600; font-size: 13px; color: var(--text-sub); margin-bottom: 7px; letter-spacing: 0.02em; }
+    .modal-field input,
+    .modal-field select,
+    .modal-field textarea { margin: 0; }
+    .modal-field textarea { resize: vertical; min-height: 90px; }
+    .wa-send-btn {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      background: #25D366; color: #fff;
+      padding: 14px; border: none;
+      border-radius: var(--radius);
+      font-family: 'Sora', sans-serif;
+      font-weight: 700; font-size: 15px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+      margin-top: 8px;
+    }
+    .wa-send-btn:hover { background: #1fb858; transform: translateY(-2px); }
+
+    /* NSFAS TIMELINE */
+    .timeline { position: relative; padding-left: 32px; }
+    .timeline::before {
+      content: "";
+      position: absolute; left: 10px; top: 8px; bottom: 8px;
+      width: 2px; background: linear-gradient(to bottom, var(--primary), var(--accent));
+      border-radius: 99px;
+    }
+    .tl-item { position: relative; margin-bottom: 22px; }
+    .tl-dot {
+      position: absolute; left: -27px; top: 5px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 2px var(--primary);
+    }
+    .tl-item h4 { font-size: 14px; font-weight: 700; color: var(--secondary); }
+    .tl-item p  { font-size: 13px; color: var(--text-sub); margin-top: 3px; }
+
+    /* APS TABLE */
+    .aps-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    .aps-table th {
+      text-align: left; padding: 10px 16px;
+      background: var(--bg-subtle);
+      color: var(--text-sub);
+      font-weight: 700; font-size: 12px;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      border-bottom: 2px solid var(--border);
+    }
+    .aps-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    .aps-table tr:last-child td { border-bottom: none; }
+    .aps-table tr:hover td { background: var(--bg-subtle); }
+
+    /* APS CALCULATOR */
+    .aps-calc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px; margin-bottom: 20px;
+    }
+    .aps-subject {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+    .aps-subject label { font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; display: block; }
+    .aps-subject select { padding: 8px 12px; font-size: 13px; margin: 0; }
+    .aps-result {
+      background: linear-gradient(135deg, var(--secondary), #1a4a6e);
+      border-radius: var(--radius-lg); padding: 24px 28px;
+      display: flex; align-items: center; gap: 20px;
+      color: #fff;
+    }
+    .aps-score {
+      font-family: 'Sora', sans-serif;
+      font-size: 3rem; font-weight: 800;
+      background: linear-gradient(135deg, #00e87a, #22c570);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; line-height: 1;
+    }
+    .aps-label { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+    .aps-verdict { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.5; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .apply-hero { padding: 60px 24px 40px; }
+      .tab-nav { max-width: 100%; }
+      .tab-btn { font-size: 12px; padding: 10px 14px; }
+      .uni-card-header { padding: 16px 18px; }
+      .help-cta { padding: 36px 24px; }
+      .modal-box { padding: 28px 24px; }
+      .aps-calc-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+  <div class="nav-links">
+    <button class="nav-close" aria-label="Close menu">✕</button>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/classes">Classes</a>
+    <a href="/apply" style="color:#22c570;font-weight:700;">🎓 Apply</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">+ Upload</a>
+    {% endif %}
+    {% if session.get('user') == 'admin' or session.get('role') == 'admin' %}
+    <a href="/admin" style="color:#c4b5fd;font-weight:700;">⚙ Admin</a>
+    {% endif %}
+    <a href="/logout">Logout</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="apply-hero">
+  <div class="badge">🎓 University & NSFAS Applications</div>
+  <h1>Your Future <span>Starts Here</span></h1>
+  <p>Everything you need to apply to a South African university and fund your studies through NSFAS — all in one place.</p>
+</div>
+
+<div class="container" style="padding-top:40px;">
+
+  <!-- TAB NAVIGATION -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('nsfas')">💰 NSFAS Funding</button>
+    <button class="tab-btn" onclick="switchTab('universities')">🏫 Universities</button>
+    <button class="tab-btn" onclick="switchTab('aps')">📊 APS Calculator</button>
+  </div>
+
+  <!-- ══════════════════════════════
+       TAB 1: NSFAS
+  ══════════════════════════════ -->
+  <div class="tab-panel active" id="panel-nsfas">
+
+    <!-- What is NSFAS -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-green">💰</div>
+        <div>
+          <h2>What is NSFAS?</h2>
+          <p>The National Student Financial Aid Scheme — free funding for qualifying students</p>
+        </div>
+      </div>
+      <p style="color:var(--text-sub);font-size:14.5px;line-height:1.75;margin-bottom:20px;">
+        NSFAS provides financial assistance to students from low-income families to study at public universities and TVET colleges in South Africa.
+        If your household earns <strong style="color:var(--primary);">R350,000 or less per year</strong>, you may qualify for full funding covering tuition, accommodation, meals, transport and learning materials.
+      </p>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;">
+        <div style="background:rgba(26,158,92,0.07);border:1px solid rgba(26,158,92,0.2);border-radius:var(--radius);padding:18px;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">🎓</div>
+          <h4 style="font-size:14px;color:var(--secondary);margin-bottom:4px;">Tuition Covered</h4>
+          <p style="font-size:13px;color:var(--text-sub);">All university & TVET registration and tuition fees paid directly</p>
+        </div>
+        <div style="background:rgba(26,158,92,0.07);border:1px solid rgba(26,158,92,0.2);border-radius:var(--radius);padding:18px;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">🏠</div>
+          <h4 style="font-size:14px;color:var(--secondary);margin-bottom:4px;">Accommodation Allowance</h4>
+          <p style="font-size:13px;color:var(--text-sub);">Monthly allowance if you live away from home</p>
+        </div>
+        <div style="background:rgba(26,158,92,0.07);border:1px solid rgba(26,158,92,0.2);border-radius:var(--radius);padding:18px;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">📚</div>
+          <h4 style="font-size:14px;color:var(--secondary);margin-bottom:4px;">Books & Materials</h4>
+          <p style="font-size:13px;color:var(--text-sub);">Allowance for textbooks and learning materials every year</p>
+        </div>
+        <div style="background:rgba(26,158,92,0.07);border:1px solid rgba(26,158,92,0.2);border-radius:var(--radius);padding:18px;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">🚌</div>
+          <h4 style="font-size:14px;color:var(--secondary);margin-bottom:4px;">Transport Allowance</h4>
+          <p style="font-size:13px;color:var(--text-sub);">Travel allowance for commuter students</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to Apply -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-green">📋</div>
+        <div>
+          <h2>How to Apply for NSFAS</h2>
+          <p>Follow these steps carefully — apply early for best results</p>
+        </div>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Check Eligibility</h3>
+          <p>Household income must be R350,000/year or less. Must be a South African citizen. Must have a valid SA ID number.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Register on MyNSFAS</h3>
+          <p>Go to <strong>my.nsfas.org.za</strong> and create your account using your ID number and a valid email address.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Complete the Application</h3>
+          <p>Fill in all personal details, household income information, and institution choice accurately.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <h3>Upload Documents</h3>
+          <p>Attach all required documents clearly scanned or photographed. Missing documents = delays.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <h3>Submit & Track</h3>
+          <p>Submit your application and track the status on myNSFAS. Check regularly for updates or requests.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">6</div>
+          <h3>Accept the Award</h3>
+          <p>If approved, log in to myNSFAS and accept your funding award. Register at your institution.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Required Documents -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-green">📁</div>
+        <div>
+          <h2>Required Documents</h2>
+          <p>Have these ready before you start your application</p>
+        </div>
+      </div>
+      <div class="docs-grid">
+        <div class="doc-item">
+          <div class="doc-icon">🪪</div>
+          <div>
+            <h4>SA ID Document / Smart Card</h4>
+            <p>Certified copy, not older than 3 months</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">👥</div>
+          <div>
+            <h4>Parent / Guardian ID</h4>
+            <p>Certified copy of both parents or legal guardian</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">💰</div>
+          <div>
+            <h4>Proof of Income / Salary Slips</h4>
+            <p>3 most recent payslips or pension statements</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">📄</div>
+          <div>
+            <h4>SASSA Grant Letter (if applicable)</h4>
+            <p>If household receives social grant, attach confirmation</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">🏠</div>
+          <div>
+            <h4>Proof of Residence</h4>
+            <p>Recent utility bill or official letter, not older than 3 months</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">📊</div>
+          <div>
+            <h4>Grade 12 Results</h4>
+            <p>Final NSC / matric certificate or most recent school report</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">✉️</div>
+          <div>
+            <h4>Acceptance / Provisional Letter</h4>
+            <p>From your chosen university or TVET college</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">📝</div>
+          <div>
+            <h4>Consent Form</h4>
+            <p>Signed parent/guardian consent if under 18</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">📂</div>
+          <div>
+            <h4>Unemployment Affidavit</h4>
+            <p>If parent/guardian is unemployed — sworn affidavit from SAPS</p>
+          </div>
+        </div>
+        <div class="doc-item">
+          <div class="doc-icon">💔</div>
+          <div>
+            <h4>Death Certificate (if applicable)</h4>
+            <p>If parent is deceased, certified copy required</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-blue">📅</div>
+        <div>
+          <h2>NSFAS Application Timeline</h2>
+          <p>Typical annual cycle — dates may shift, apply as soon as applications open</p>
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>September – October: Applications Open</h4>
+          <p>NSFAS opens the application portal for the following academic year. Apply immediately — do not wait!</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>October – November: Matric Exams</h4>
+          <p>Complete your Grade 12 exams while your NSFAS application is being processed.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>January: Results & Provisional Funding</h4>
+          <p>Check myNSFAS for your outcome. Provisionally funded students can register at university.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>February – March: University Registration</h4>
+          <p>Register at your institution. Inform the financial aid office of your NSFAS application.</p>
+        </div>
+        <div class="tl-item">
+          <div class="tl-dot"></div>
+          <h4>March onwards: Allowances Disbursed</h4>
+          <p>Monthly allowances are loaded onto your NSFAS wallet card or bank account.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Get Help CTA -->
+    <div class="help-cta">
+      <h2>Need Help Applying for NSFAS? 🙋</h2>
+      <p>Don't navigate this alone. Get personalised step-by-step guidance from someone who knows the process — affordable and reliable assistance available now.</p>
+      <button class="wa-btn" onclick="openModal('NSFAS Application Assistance')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp Me for Help
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       TAB 2: UNIVERSITIES
+  ══════════════════════════════ -->
+  <div class="tab-panel" id="panel-universities">
+
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-blue">🏫</div>
+        <div>
+          <h2>South African Universities</h2>
+          <p>Browse universities, explore faculties, and find your ideal course</p>
+        </div>
+      </div>
+
+      <div class="uni-search-wrap">
+        <input type="text" id="uniSearch" placeholder="🔍  Search universities or courses..." oninput="filterUnis()">
+        <select id="uniProvince" onchange="filterUnis()">
+          <option value="">All Provinces</option>
+          <option value="Gauteng">Gauteng</option>
+          <option value="Western Cape">Western Cape</option>
+          <option value="KwaZulu-Natal">KwaZulu-Natal</option>
+          <option value="Eastern Cape">Eastern Cape</option>
+          <option value="Free State">Free State</option>
+          <option value="North West">North West</option>
+          <option value="Limpopo">Limpopo</option>
+          <option value="Mpumalanga">Mpumalanga</option>
+          <option value="Northern Cape">Northern Cape</option>
+        </select>
+        <select id="uniType" onchange="filterUnis()">
+          <option value="">All Types</option>
+          <option value="Traditional">Traditional University</option>
+          <option value="Technology">University of Technology</option>
+          <option value="Comprehensive">Comprehensive University</option>
+        </select>
+      </div>
+
+      <div class="uni-list" id="uniList">
+        <!-- Dynamically rendered by JS -->
+      </div>
+    </div>
+
+    <!-- How to Apply -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-blue">📋</div>
+        <div>
+          <h2>How to Apply to a University</h2>
+          <p>General steps — always check the specific university's website for exact requirements</p>
+        </div>
+      </div>
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Research Your Options</h3>
+          <p>Choose 2–3 universities and identify your preferred course. Check APS requirements for each.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Check APS Score</h3>
+          <p>Calculate your Admission Point Score using your Grade 11 and 12 results. Use our APS calculator tab.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Complete Online Application</h3>
+          <p>Apply on each university's official website. Most applications open in April–September for the following year.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">4</div>
+          <h3>Pay Application Fee</h3>
+          <p>Most universities charge R100–R200 application fee. Keep your proof of payment.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">5</div>
+          <h3>Submit Documents</h3>
+          <p>Upload certified ID, Grade 11/12 results, proof of residence, and other required documents.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">6</div>
+          <h3>Wait for Offer Letter</h3>
+          <p>Provisional acceptance letters arrive November–January. Apply for NSFAS at the same time.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-cta">
+      <h2>Need Help Applying to a University? 🎓</h2>
+      <p>Choosing the right university, course and meeting all deadlines can be overwhelming. Get personalised help tailored to your results and goals.</p>
+      <button class="wa-btn" onclick="openModal('University Application Assistance')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp Me for Help
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       TAB 3: APS CALCULATOR
+  ══════════════════════════════ -->
+  <div class="tab-panel" id="panel-aps">
+
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-green">📊</div>
+        <div>
+          <h2>APS Calculator</h2>
+          <p>Calculate your Admission Point Score from your matric results</p>
+        </div>
+      </div>
+      <p style="font-size:13.5px;color:var(--text-sub);margin-bottom:24px;line-height:1.7;">
+        Your APS (Admission Point Score) is calculated from your 6 best subjects <strong>excluding Life Orientation</strong>. Use this calculator to see your score and which programmes you qualify for.
+      </p>
+
+      <div class="aps-calc-grid" id="apsGrid">
+        <!-- populated by JS -->
+      </div>
+
+      <div class="aps-result" id="apsResult">
+        <div>
+          <div class="aps-score" id="apsScore">0</div>
+          <div class="aps-label">Your APS Score</div>
+        </div>
+        <div class="aps-verdict" id="apsVerdict">Select your subject marks above to calculate your APS score.</div>
+      </div>
+    </div>
+
+    <!-- APS to marks conversion table -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-blue">📈</div>
+        <div>
+          <h2>APS Conversion Table</h2>
+          <p>How your percentage mark converts to an APS point</p>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="aps-table">
+          <thead>
+            <tr>
+              <th>% Mark</th><th>Rating Code</th><th>APS Points</th><th>Achievement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>80 – 100%</td><td>7</td><td><strong style="color:var(--primary);">7</strong></td><td>Outstanding</td></tr>
+            <tr><td>70 – 79%</td><td>6</td><td><strong style="color:var(--primary);">6</strong></td><td>Meritorious</td></tr>
+            <tr><td>60 – 69%</td><td>5</td><td><strong style="color:var(--primary);">5</strong></td><td>Substantial</td></tr>
+            <tr><td>50 – 59%</td><td>4</td><td><strong style="color:var(--primary);">4</strong></td><td>Adequate</td></tr>
+            <tr><td>40 – 49%</td><td>3</td><td><strong style="color:var(--primary);">3</strong></td><td>Moderate</td></tr>
+            <tr><td>30 – 39%</td><td>2</td><td><strong style="color:var(--primary);">2</strong></td><td>Elementary</td></tr>
+            <tr><td>0 – 29%</td><td>1</td><td><strong style="color:#ef4444;">1</strong></td><td>Not Achieved</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px;">⚠️ Note: Life Orientation counts at half value (max 2 points) or not at all at some universities. Always verify with each institution.</p>
+    </div>
+
+    <!-- Typical APS requirements -->
+    <div class="card" style="margin-bottom:24px;">
+      <div class="section-header">
+        <div class="icon-wrap icon-green">🎯</div>
+        <div>
+          <h2>Typical APS Requirements by Faculty</h2>
+          <p>Minimum scores commonly required — always verify with specific universities</p>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="aps-table">
+          <thead>
+            <tr><th>Faculty / Programme</th><th>Typical Min. APS</th><th>Key Subjects</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>🩺 MBChB (Medicine)</td><td><strong style="color:#ef4444;">36–42</strong></td><td>Maths, Physical Science, Life Sciences (all 70%+)</td></tr>
+            <tr><td>⚖️ LLB (Law)</td><td><strong style="color:#f59e0b;">30–34</strong></td><td>English (60%+), History or Accounting</td></tr>
+            <tr><td>💻 BSc Computer Science</td><td><strong style="color:#f59e0b;">28–34</strong></td><td>Maths (60%+), Physical Science</td></tr>
+            <tr><td>🏗️ BSc Engineering</td><td><strong style="color:#f59e0b;">30–36</strong></td><td>Maths (70%+), Physical Science (60%+)</td></tr>
+            <tr><td>💊 BPharm (Pharmacy)</td><td><strong style="color:#f59e0b;">28–34</strong></td><td>Maths, Physical Science, Life Sciences</td></tr>
+            <tr><td>📐 BSc Architecture</td><td><strong style="color:#f59e0b;">26–32</strong></td><td>Maths (60%+), English</td></tr>
+            <tr><td>💰 BCom Accounting</td><td><strong style="color:var(--primary);">26–32</strong></td><td>Maths (60%+) or Maths Literacy (70%)</td></tr>
+            <tr><td>👩‍🏫 BEd (Teaching)</td><td><strong style="color:var(--primary);">22–28</strong></td><td>English, relevant subjects for phase/subject</td></tr>
+            <tr><td>🏥 BSc Nursing</td><td><strong style="color:var(--primary);">24–30</strong></td><td>Life Sciences, English, Maths or Maths Literacy</td></tr>
+            <tr><td>🎨 BA Fine Arts / Design</td><td><strong style="color:var(--primary);">20–26</strong></td><td>English, portfolio often required</td></tr>
+            <tr><td>📱 Diploma ICT</td><td><strong style="color:#22c570);">18–24</strong></td><td>Maths (50%+), English</td></tr>
+            <tr><td>🍳 Diploma Hospitality</td><td><strong style="color:#22c570);">16–22</strong></td><td>English, any commercial or consumer studies</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="help-cta">
+      <h2>Not Sure Which Courses You Qualify For? 🤔</h2>
+      <p>Send your subject marks and get a personalised breakdown of which universities and programmes you can apply to, plus a step-by-step application plan.</p>
+      <button class="wa-btn" onclick="openModal('APS & Course Guidance')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Get My Personalised Course List
+      </button>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- WHATSAPP MODAL -->
+<div class="modal-overlay" id="waModal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2>📲 Get Application Help</h2>
+    <p class="modal-sub" id="modalSubtext">Tell us a bit about yourself and we'll get back to you on WhatsApp to guide you through the process.</p>
+
+    <div class="modal-field">
+      <label>Your Full Name</label>
+      <input type="text" id="mName" placeholder="e.g. Thabo Nkosi">
+    </div>
+    <div class="modal-field">
+      <label>Your WhatsApp Number</label>
+      <input type="tel" id="mPhone" placeholder="e.g. 0821234567">
+    </div>
+    <div class="modal-field">
+      <label>Grade / Current Level</label>
+      <select id="mGrade">
+        <option value="">Select...</option>
+        <option>Grade 11</option>
+        <option>Grade 12</option>
+        <option>Matric results in hand</option>
+        <option>Already at university</option>
+        <option>Gap year / re-applying</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>What do you need help with?</label>
+      <select id="mService">
+        <option value="">Select...</option>
+        <option>NSFAS Application</option>
+        <option>University Application</option>
+        <option>Both NSFAS + University</option>
+        <option>Course / Career Guidance</option>
+        <option>APS & Admissions Advice</option>
+        <option>NBT Test Preparation</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Any extra details or questions? (optional)</label>
+      <textarea id="mMessage" placeholder="e.g. I want to study nursing at UKZN. I'm not sure which subjects I need..."></textarea>
+    </div>
+
+    <button class="wa-send-btn" onclick="sendWhatsApp()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Send to WhatsApp →
+    </button>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='school.js') }}"></script>
+
+<!-- BOTTOM TAB BAR (mobile) -->
+<nav class="bottom-nav">
+  <a href="/dashboard">
+    <span class="tab-icon">🏠</span>
+    <span class="tab-label">Home</span>
+  </a>
+  <a href="/classes">
+    <span class="tab-icon">📚</span>
+    <span class="tab-label">Classes</span>
+  </a>
+  <a href="/apply" class="active">
+    <span class="tab-icon">🎓</span>
+    <span class="tab-label">Apply</span>
+  </a>
+  <a href="/planner">
+    <span class="tab-icon">📅</span>
+    <span class="tab-label">Planner</span>
+  </a>
+  <a href="/logout" class="tab-logout">
+    <span class="tab-icon">👋</span>
+    <span class="tab-label">Logout</span>
+  </a>
+</nav>
+
+<script>
+// ── UNIVERSITIES DATA ──────────────────────────────────────────────────────
+const UNIVERSITIES = [
+  {
+    name:"University of Cape Town (UCT)",
+    abbr:"UCT",
+    province:"Western Cape",
+    type:"Traditional",
+    color:"#003B5C",
+    website:"https://www.uct.ac.za",
+    aps:"36+",
+    faculties:[
+      {name:"Commerce – BCom Accounting",emoji:"💼"},
+      {name:"Commerce – BCom Finance",emoji:"💰"},
+      {name:"Engineering – BSc Civil",emoji:"🏗️"},
+      {name:"Engineering – BSc Electrical",emoji:"⚡"},
+      {name:"Health Sciences – MBChB",emoji:"🩺"},
+      {name:"Humanities – BA",emoji:"📖"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Science – BSc Computer Science",emoji:"💻"},
+      {name:"Science – BSc Actuarial Science",emoji:"📊"},
+    ]
+  },
+  {
+    name:"University of the Witwatersrand (Wits)",
+    abbr:"Wits",
+    province:"Gauteng",
+    type:"Traditional",
+    color:"#003876",
+    website:"https://www.wits.ac.za",
+    aps:"34+",
+    faculties:[
+      {name:"Engineering – BSc Mining",emoji:"⛏️"},
+      {name:"Engineering – BSc Mechanical",emoji:"⚙️"},
+      {name:"Commerce – BCom",emoji:"💼"},
+      {name:"Health Sciences – MBBCh",emoji:"🩺"},
+      {name:"Humanities – BA",emoji:"📖"},
+      {name:"Science – BSc Computer Science",emoji:"💻"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Architecture – BSc",emoji:"📐"},
+    ]
+  },
+  {
+    name:"Stellenbosch University (SU)",
+    abbr:"SU",
+    province:"Western Cape",
+    type:"Traditional",
+    color:"#A02020",
+    website:"https://www.sun.ac.za",
+    aps:"32+",
+    faculties:[
+      {name:"AgriSciences – BSc",emoji:"🌾"},
+      {name:"Arts & Social Sciences – BA",emoji:"🎨"},
+      {name:"Economic & Management Sciences",emoji:"💰"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+      {name:"Engineering – BEng",emoji:"🏗️"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Medicine – MBChB",emoji:"🩺"},
+      {name:"Science – BSc",emoji:"🔬"},
+    ]
+  },
+  {
+    name:"University of Pretoria (UP)",
+    abbr:"UP",
+    province:"Gauteng",
+    type:"Traditional",
+    color:"#002147",
+    website:"https://www.up.ac.za",
+    aps:"30+",
+    faculties:[
+      {name:"Built Environment – BSc Architecture",emoji:"📐"},
+      {name:"Economic & Management Sciences",emoji:"💼"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+      {name:"Engineering – BEng",emoji:"⚙️"},
+      {name:"Humanities – BA",emoji:"📖"},
+      {name:"IT – BSc Computer Science",emoji:"💻"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Veterinary Science – BVSc",emoji:"🐾"},
+    ]
+  },
+  {
+    name:"University of KwaZulu-Natal (UKZN)",
+    abbr:"UKZN",
+    province:"KwaZulu-Natal",
+    type:"Traditional",
+    color:"#006747",
+    website:"https://www.ukzn.ac.za",
+    aps:"26+",
+    faculties:[
+      {name:"Agriculture – BSc",emoji:"🌾"},
+      {name:"Arts – BA",emoji:"📖"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+      {name:"Engineering – BSc Eng",emoji:"🏗️"},
+      {name:"Health Sciences – MBChB",emoji:"🩺"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Management Studies – BCom",emoji:"💼"},
+      {name:"Science – BSc",emoji:"🔬"},
+    ]
+  },
+  {
+    name:"University of Johannesburg (UJ)",
+    abbr:"UJ",
+    province:"Gauteng",
+    type:"Comprehensive",
+    color:"#1D1D1B",
+    website:"https://www.uj.ac.za",
+    aps:"24+",
+    faculties:[
+      {name:"Art, Design & Architecture",emoji:"🎨"},
+      {name:"Business – BCom",emoji:"💼"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+      {name:"Engineering & Built Environment",emoji:"🏗️"},
+      {name:"Health Sciences – Nursing",emoji:"🏥"},
+      {name:"Humanities",emoji:"📖"},
+      {name:"IT – BSc Information Technology",emoji:"💻"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Science",emoji:"🔬"},
+    ]
+  },
+  {
+    name:"Cape Peninsula University of Technology (CPUT)",
+    abbr:"CPUT",
+    province:"Western Cape",
+    type:"Technology",
+    color:"#0066A1",
+    website:"https://www.cput.ac.za",
+    aps:"20+",
+    faculties:[
+      {name:"Applied Sciences – Diploma",emoji:"🔬"},
+      {name:"Business – Diploma BCom",emoji:"💼"},
+      {name:"Education – Diploma",emoji:"👩‍🏫"},
+      {name:"Engineering – Diploma",emoji:"⚙️"},
+      {name:"Informatics – BSc IT",emoji:"💻"},
+      {name:"Journalism & Media Studies",emoji:"📰"},
+    ]
+  },
+  {
+    name:"Tshwane University of Technology (TUT)",
+    abbr:"TUT",
+    province:"Gauteng",
+    type:"Technology",
+    color:"#006B3F",
+    website:"https://www.tut.ac.za",
+    aps:"18+",
+    faculties:[
+      {name:"Arts & Design",emoji:"🎨"},
+      {name:"Economics & Finance – Diploma",emoji:"💰"},
+      {name:"Engineering – Diploma",emoji:"⚙️"},
+      {name:"ICT – Diploma",emoji:"💻"},
+      {name:"Management Sciences",emoji:"💼"},
+      {name:"Humanities – Diploma",emoji:"📖"},
+    ]
+  },
+  {
+    name:"University of Limpopo (UL)",
+    abbr:"UL",
+    province:"Limpopo",
+    type:"Traditional",
+    color:"#006B3F",
+    website:"https://www.ul.ac.za",
+    aps:"22+",
+    faculties:[
+      {name:"Health Sciences – MBChB",emoji:"🩺"},
+      {name:"Humanities – BA",emoji:"📖"},
+      {name:"Management & Law – BCom",emoji:"💼"},
+      {name:"Science & Agriculture – BSc",emoji:"🌾"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+    ]
+  },
+  {
+    name:"University of Fort Hare (UFH)",
+    abbr:"UFH",
+    province:"Eastern Cape",
+    type:"Traditional",
+    color:"#6B1414",
+    website:"https://www.ufh.ac.za",
+    aps:"22+",
+    faculties:[
+      {name:"Agriculture & Environmental Sciences",emoji:"🌾"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Management & Commerce – BCom",emoji:"💼"},
+      {name:"Science & Agriculture – BSc",emoji:"🔬"},
+      {name:"Social Sciences & Humanities – BA",emoji:"📖"},
+    ]
+  },
+  {
+    name:"Walter Sisulu University (WSU)",
+    abbr:"WSU",
+    province:"Eastern Cape",
+    type:"Comprehensive",
+    color:"#1B5E20",
+    website:"https://www.wsu.ac.za",
+    aps:"18+",
+    faculties:[
+      {name:"Business – BCom & Diplomas",emoji:"💼"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+      {name:"Engineering – Diploma",emoji:"⚙️"},
+      {name:"Health Sciences – Nursing",emoji:"🏥"},
+      {name:"Natural Sciences – BSc",emoji:"🔬"},
+      {name:"Social Sciences – BA",emoji:"📖"},
+    ]
+  },
+  {
+    name:"North-West University (NWU)",
+    abbr:"NWU",
+    province:"North West",
+    type:"Traditional",
+    color:"#4F2D7F",
+    website:"https://www.nwu.ac.za",
+    aps:"24+",
+    faculties:[
+      {name:"Commerce & Management – BCom",emoji:"💼"},
+      {name:"Education – BEd",emoji:"👩‍🏫"},
+      {name:"Engineering – BEng",emoji:"⚙️"},
+      {name:"Health Sciences – BSc",emoji:"🏥"},
+      {name:"Humanities – BA",emoji:"📖"},
+      {name:"Law – LLB",emoji:"⚖️"},
+      {name:"Natural Sciences – BSc",emoji:"🔬"},
+    ]
+  },
+];
+
+// ── RENDER UNIVERSITIES ──────────────────────────────────────────────────
+function renderUnis(list) {
+  const container = document.getElementById('uniList');
+  if (!list.length) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><h3>No universities found</h3><p>Try different search terms or remove filters</p></div>`;
+    return;
+  }
+  container.innerHTML = list.map((u, i) => `
+    <div class="uni-card" id="uniCard${i}">
+      <div class="uni-card-header" onclick="toggleUni(${i})">
+        <div class="uni-logo" style="background:${u.color};">${u.abbr.slice(0,3)}</div>
+        <div style="flex:1;min-width:0;">
+          <h3>${u.name}</h3>
+          <div class="uni-meta">📍 ${u.province} &nbsp;·&nbsp; APS ${u.aps}</div>
+          <div class="uni-tags">
+            <span class="uni-tag">${u.type}</span>
+            <span class="uni-tag blue">${u.faculties.length} programmes listed</span>
+          </div>
+        </div>
+        <span class="uni-chevron">▾</span>
+      </div>
+      <div class="uni-card-body">
+        <div class="courses-label">Popular Programmes</div>
+        <div class="courses-grid-mini">
+          ${u.faculties.map(f=>`<div class="course-chip"><span class="dot"></span>${f.emoji} ${f.name}</div>`).join('')}
+        </div>
+        <div class="uni-card-actions">
+          <a href="${u.website}" target="_blank" rel="noopener" class="btn btn-sm">🌐 Official Website</a>
+          <button class="btn btn-sm" style="background:var(--secondary);" onclick="openModal('University Application – ${u.name}')">📲 Get Help Applying</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleUni(i) {
+  const card = document.getElementById('uniCard' + i);
+  card.classList.toggle('open');
+}
+
+function filterUnis() {
+  const search = document.getElementById('uniSearch').value.toLowerCase();
+  const province = document.getElementById('uniProvince').value;
+  const type = document.getElementById('uniType').value;
+  const filtered = UNIVERSITIES.filter(u => {
+    const matchSearch = !search || u.name.toLowerCase().includes(search) || u.faculties.some(f=>f.name.toLowerCase().includes(search));
+    const matchProv = !province || u.province === province;
+    const matchType = !type || u.type === type;
+    return matchSearch && matchProv && matchType;
+  });
+  renderUnis(filtered);
+}
+
+renderUnis(UNIVERSITIES);
+
+// ── TAB SWITCHING ──────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ── APS CALCULATOR ─────────────────────────────────────────────────────────
+const APS_SUBJECTS = [
+  'Home Language','First Additional Language','Mathematics','Mathematical Literacy',
+  'Physical Sciences','Life Sciences','Accounting','Business Studies','Economics',
+  'History','Geography','Computer Applications Technology','Information Technology',
+  'Engineering Graphics & Design','Agricultural Sciences','Life Orientation (½ value)'
+];
+
+function buildAPS() {
+  const grid = document.getElementById('apsGrid');
+  const subjects = [
+    'Home Language','First Additional Language','Mathematics / Maths Literacy',
+    'Physical Sciences / Life Sciences','Subject 5','Subject 6','Life Orientation (optional)'
+  ];
+  grid.innerHTML = subjects.map((s,i)=>`
+    <div class="aps-subject">
+      <label>${s}</label>
+      <select id="apsS${i}" onchange="calcAPS()">
+        <option value="0">-- Select mark --</option>
+        <option value="7">80–100% (7 pts)</option>
+        <option value="6">70–79% (6 pts)</option>
+        <option value="5">60–69% (5 pts)</option>
+        <option value="4">50–59% (4 pts)</option>
+        <option value="3">40–49% (3 pts)</option>
+        <option value="2">30–39% (2 pts)</option>
+        <option value="1">0–29% (1 pt)</option>
+      </select>
+    </div>
+  `).join('');
+}
+
+function calcAPS() {
+  let total = 0;
+  for (let i = 0; i < 6; i++) {
+    total += parseInt(document.getElementById('apsS' + i).value) || 0;
+  }
+  const lo = (parseInt(document.getElementById('apsS6').value) || 0) * 0.5;
+  const score = total; // LO often excluded; show without
+  document.getElementById('apsScore').textContent = score;
+  let verdict = '';
+  if (score === 0) verdict = 'Select your subject marks above to calculate your APS score.';
+  else if (score >= 36) verdict = '🌟 Excellent! You qualify for highly competitive programmes like Medicine, Engineering, and Law at top universities.';
+  else if (score >= 30) verdict = '✅ Strong score! You qualify for most BCom, BSc, BEd, and LLB programmes at traditional universities.';
+  else if (score >= 24) verdict = '👍 Good score! Many comprehensive university programmes and diplomas are within reach.';
+  else if (score >= 18) verdict = '📌 You qualify for diplomas and certificates at universities of technology and TVET colleges.';
+  else verdict = '⚠️ Score is low. Consider bridging programmes or N-courses at a TVET college to improve qualifications.';
+  document.getElementById('apsVerdict').textContent = verdict;
+}
+
+buildAPS();
+
+// ── WHATSAPP MODAL ─────────────────────────────────────────────────────────
+function openModal(service) {
+  document.getElementById('waModal').classList.add('open');
+  if (service) {
+    document.getElementById('mService').value = service;
+    document.getElementById('modalSubtext').textContent = `You selected: ${service}. Fill in your details and we'll contact you on WhatsApp.`;
+  }
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('waModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('waModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function sendWhatsApp() {
+  const name    = document.getElementById('mName').value.trim();
+  const phone   = document.getElementById('mPhone').value.trim();
+  const grade   = document.getElementById('mGrade').value;
+  const service = document.getElementById('mService').value;
+  const message = document.getElementById('mMessage').value.trim();
+
+  if (!name || !phone) {
+    alert('Please enter your name and WhatsApp number so we can contact you.');
+    return;
+  }
+
+  const text = `Hello! I need help with: *${service || 'Application Assistance'}*\n\n` +
+               `👤 Name: ${name}\n` +
+               `📞 My Number: ${phone}\n` +
+               `🏫 Grade/Level: ${grade || 'Not specified'}\n` +
+               (message ? `\n💬 Details: ${message}` : '');
+
+  const encoded = encodeURIComponent(text);
+  window.open(`https://wa.me/27799763190?text=${encoded}`, '_blank');
+  closeModal();
+}
+</script>
+</body>
+</html>

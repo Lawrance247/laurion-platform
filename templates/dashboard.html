@@ -27,6 +27,7 @@
     <button class="nav-close" aria-label="Close menu">✕</button>
     <a href="/dashboard">Dashboard</a>
     <a href="/classes">Classes</a>
+    <a href="/apply" style="color:#22c570;font-weight:700;">🎓 Apply</a>
     <a href="/planner">Planner</a>
     <a href="/notes">Notes</a>
     {% if session.get('role') == 'teacher' %}
@@ -91,6 +92,12 @@
       <h2>Planner</h2>
       <p>Manage your tasks</p>
       <a href="/planner" class="btn btn-sm" style="margin-top:10px;">Open</a>
+    </div>
+    <div class="stat-card" style="border:1.5px solid rgba(26,158,92,0.35);background:linear-gradient(145deg,#fff,rgba(26,158,92,0.04));">
+      <div class="stat-icon">🎓</div>
+      <h2>Apply</h2>
+      <p>NSFAS &amp; University Applications</p>
+      <a href="/apply" class="btn btn-sm" style="margin-top:10px;">Explore →</a>
     </div>
     {% endif %}
   </div>
@@ -234,6 +241,10 @@ function showToast(msg, type='success') {
   <a href="/classes" class="{% if '/classes' in request.path or '/grade' in request.path or '/subject' in request.path %}active{% endif %}">
     <span class="tab-icon">📚</span>
     <span class="tab-label">Classes</span>
+  </a>
+  <a href="/apply" class="{% if request.path == '/apply' %}active{% endif %}">
+    <span class="tab-icon">🎓</span>
+    <span class="tab-label">Apply</span>
   </a>
   <a href="/planner" class="{% if request.path == '/planner' %}active{% endif %}">
     <span class="tab-icon">📅</span>

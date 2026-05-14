@@ -223,6 +223,11 @@ def dashboard():
 def classes():
     return render_template("classes.html")
 
+@app.route("/apply")
+@login_required
+def apply():
+    return render_template("apply.html")
+
 @app.route("/grade/<int:grade>")
 @login_required
 def grade(grade):

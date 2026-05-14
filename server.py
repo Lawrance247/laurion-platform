@@ -202,21 +202,25 @@ def dashboard():
         db.session.commit()
         return redirect("/dashboard")
 
-    from sqlalchemy import cast, DateTime as SADateTime
-    date_col    = cast(Planner.date, SADateTime)
     today_start = datetime.combine(today, datetime.min.time())
     today_end   = datetime.combine(today, datetime.max.time())
 
-    tasks_today = Planner.query.filter(
-        Planner.user == username,
-        date_col >= today_start,
-        date_col <= today_end,
-    ).order_by(date_col).all()
-
-    overdue_tasks = Planner.query.filter(
-        Planner.user == username,
-        date_col < today_start,
-    ).order_by(date_col.desc()).all()
+    try:
+        from sqlalchemy import cast, DateTime as SADateTime
+        date_col = cast(Planner.date, SADateTime)
+        tasks_today = Planner.query.filter(
+            Planner.user == username,
+            date_col >= today_start,
+            date_col <= today_end,
+        ).order_by(date_col).all()
+        overdue_tasks = Planner.query.filter(
+            Planner.user == username,
+            date_col < today_start,
+        ).order_by(date_col.desc()).all()
+    except Exception:
+        all_tasks = Planner.query.filter_by(user=username).order_by(Planner.id).all()
+        tasks_today   = [t for t in all_tasks if t.date and today_start <= t.date <= today_end]
+        overdue_tasks = [t for t in all_tasks if t.date and t.date < today_start]
 
     total_downloads   = db.session.query(func.sum(Material.downloads)).scalar() or 0
     popular_materials = Material.query.order_by(Material.downloads.desc()).limit(5).all()
@@ -389,9 +393,12 @@ def planner():
         ))
         db.session.commit()
         return redirect("/planner")
-    from sqlalchemy import cast, DateTime as SADateTime
-    date_col = cast(Planner.date, SADateTime)
-    tasks = Planner.query.filter_by(user=session["user"]).order_by(date_col).all()
+    try:
+        from sqlalchemy import cast, DateTime as SADateTime
+        date_col = cast(Planner.date, SADateTime)
+        tasks = Planner.query.filter_by(user=session["user"]).order_by(date_col).all()
+    except Exception:
+        tasks = Planner.query.filter_by(user=session["user"]).order_by(Planner.id).all()
     return render_template("planner.html", tasks=tasks, subjects=SUBJECTS)
 
 @app.route("/delete_task/<int:id>")

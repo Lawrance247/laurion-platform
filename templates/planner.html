@@ -121,7 +121,7 @@ const tasks = [
   {
     title: {{ task.title|tojson }},
     description: {{ task.description|tojson }},
-    date: "{{ task.date.isoformat() if task.date else '' }}",
+    date: "{{ task.date.strftime('%Y-%m-%dT%H:%M:%S') if task.date else '' }}",
     id: {{ task.id }}
   }{% if not loop.last %},{% endif %}
   {% endfor %}

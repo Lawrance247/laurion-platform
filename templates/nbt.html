@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#1a9e5c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Laurion">
+  <link rel="apple-touch-icon" href="/static/images/icon-192.png">
+  <title>NBT Preparation — Laurion</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=30">
+  <link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}">
+  <script src="/static/offline.js" defer></script>
+  <style>
+    /* ── NBT PAGE ── */
+    .nbt-hero {
+      background: linear-gradient(145deg, #0b1f3a 0%, #1a3c5e 50%, #0d2d1a 100%);
+      padding: 72px 48px 52px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .nbt-hero::before {
+      content: "";
+      position: absolute; width: 650px; height: 650px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,158,92,0.18) 0%, transparent 70%);
+      top: -220px; left: 50%; transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .nbt-hero h1 {
+      font-size: clamp(2rem, 4vw, 3rem); color: #fff;
+      margin-bottom: 12px; position: relative; z-index: 1;
+    }
+    .nbt-hero h1 span {
+      background: linear-gradient(135deg, #00e87a, #22c570);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nbt-hero p {
+      color: rgba(255,255,255,0.7); font-size: 15px;
+      max-width: 540px; margin: 0 auto 28px;
+      line-height: 1.75; position: relative; z-index: 1;
+    }
+    .nbt-hero-stats {
+      display: flex; gap: 16px; justify-content: center;
+      flex-wrap: wrap; position: relative; z-index: 1;
+    }
+    .nbt-hero-stat {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px; padding: 16px 24px;
+      text-align: center; min-width: 90px;
+    }
+    .nbt-hero-stat .num {
+      font-family: 'Sora', sans-serif; font-size: 1.7rem;
+      font-weight: 800; color: #00e87a; line-height: 1;
+    }
+    .nbt-hero-stat .lbl {
+      font-size: 11px; color: rgba(255,255,255,0.5);
+      margin-top: 5px; font-weight: 600; letter-spacing: 0.05em;
+    }
+
+    /* MAIN WRAPPER */
+    .nbt-wrapper { padding: 44px 48px; max-width: 1100px; margin: auto; }
+
+    /* QUICK INFO STRIP */
+    .info-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px; margin-bottom: 36px;
+    }
+    .info-tile {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      display: flex; gap: 14px; align-items: flex-start;
+      transition: var(--transition);
+    }
+    .info-tile:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .info-tile .ic {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: rgba(26,158,92,0.1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; flex-shrink: 0;
+    }
+    .info-tile h4 { font-size: 13.5px; color: var(--secondary); font-weight: 700; margin-bottom: 3px; }
+    .info-tile p  { font-size: 12.5px; color: var(--text-sub); line-height: 1.55; }
+
+    /* SECTION HEADERS */
+    .nbt-section { margin-bottom: 36px; }
+    .nbt-section-header {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 22px;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      margin-bottom: 0;
+    }
+    .nbt-section-header.al  { background: linear-gradient(135deg, rgba(26,158,92,0.12), rgba(26,158,92,0.04)); border: 1.5px solid rgba(26,158,92,0.25); border-bottom: none; }
+    .nbt-section-header.mat { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.04)); border: 1.5px solid rgba(59,130,246,0.25); border-bottom: none; }
+    .nbt-section-header.ql  { background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.04)); border: 1.5px solid rgba(245,158,11,0.25);  border-bottom: none; }
+    .nbt-section-icon {
+      width: 46px; height: 46px; border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; flex-shrink: 0;
+    }
+    .al  .nbt-section-icon { background: rgba(26,158,92,0.15); }
+    .mat .nbt-section-icon { background: rgba(59,130,246,0.15); }
+    .ql  .nbt-section-icon { background: rgba(245,158,11,0.15); }
+    .nbt-section-header h2 { font-size: 1.15rem; color: var(--secondary); }
+    .nbt-section-header p  { font-size: 12.5px; color: var(--text-sub); margin-top: 2px; }
+    .nbt-section-count {
+      margin-left: auto; flex-shrink: 0;
+      font-size: 12px; font-weight: 700;
+      padding: 4px 12px; border-radius: 99px;
+    }
+    .al  .nbt-section-count { background: rgba(26,158,92,0.12); color: var(--primary); }
+    .mat .nbt-section-count { background: rgba(59,130,246,0.12); color: #3b82f6; }
+    .ql  .nbt-section-count { background: rgba(245,158,11,0.12); color: #d97706; }
+
+    /* MATERIAL LIST */
+    .nbt-materials {
+      border: 1.5px solid var(--border);
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      overflow: hidden;
+    }
+    .al  .nbt-materials { border-color: rgba(26,158,92,0.25); }
+    .mat .nbt-materials { border-color: rgba(59,130,246,0.25); }
+    .ql  .nbt-materials { border-color: rgba(245,158,11,0.25); }
+
+    .material-row {
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 22px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      transition: var(--transition);
+    }
+    .material-row:last-child { border-bottom: none; }
+    .material-row:hover { background: var(--bg-subtle); }
+    .mat-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(26,158,92,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .mat-info { flex: 1; min-width: 0; }
+    .mat-info h4 {
+      font-size: 14px; font-weight: 700; color: var(--secondary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .mat-info span { font-size: 12px; color: var(--muted); }
+    .mat-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .mat-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 16px; border-radius: 9px;
+      font-family: 'Sora', sans-serif; font-weight: 700;
+      font-size: 12.5px; border: none; cursor: pointer;
+      transition: var(--transition); text-decoration: none;
+    }
+    .mat-btn-primary {
+      background: var(--primary); color: #fff;
+    }
+    .mat-btn-primary:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .mat-btn-danger {
+      background: rgba(239,68,68,0.08);
+      color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .mat-btn-danger:hover { background: rgba(239,68,68,0.15); }
+
+    /* EMPTY STATE */
+    .nbt-empty {
+      background: var(--bg-card);
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-sub);
+    }
+    .nbt-empty .empty-icon { font-size: 2.5rem; margin-bottom: 14px; }
+    .nbt-empty h4 { font-size: 15px; color: var(--secondary); margin-bottom: 8px; }
+    .nbt-empty p  { font-size: 13.5px; }
+
+    /* TIPS */
+    .tips-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+      gap: 14px; margin-top: 36px;
+    }
+    .tip-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      transition: var(--transition);
+    }
+    .tip-card:hover { border-color: var(--primary); }
+    .tip-num {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff; font-weight: 800; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 10px;
+    }
+    .tip-card h4 { font-size: 13.5px; color: var(--secondary); margin-bottom: 6px; font-weight: 700; }
+    .tip-card p  { font-size: 12.5px; color: var(--text-sub); line-height: 1.6; }
+
+    /* APPLY STRIP */
+    .apply-strip {
+      background: linear-gradient(135deg, var(--secondary), #0d3d2a);
+      border-radius: var(--radius-xl); padding: 36px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 24px; flex-wrap: wrap; margin-top: 36px;
+    }
+    .apply-strip h3 { font-size: 1.4rem; color: #fff; margin-bottom: 6px; }
+    .apply-strip p  { font-size: 14px; color: rgba(255,255,255,0.65); max-width: 480px; }
+    .apply-strip-btns { display: flex; gap: 12px; flex-wrap: wrap; flex-shrink: 0; }
+    .wa-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #25D366; color: #fff !important;
+      padding: 12px 24px; border-radius: var(--radius);
+      font-family: 'Sora', sans-serif; font-weight: 700; font-size: 14px;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+      transition: var(--transition); border: none; cursor: pointer;
+      text-decoration: none;
+    }
+    .wa-btn:hover { background: #1fb858; transform: translateY(-2px); }
+
+    @media (max-width: 768px) {
+      .nbt-hero { padding: 52px 24px 38px; }
+      .nbt-wrapper { padding: 28px 20px; }
+      .material-row { flex-wrap: wrap; }
+      .mat-actions { width: 100%; }
+      .apply-strip { padding: 28px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-logo">
+    <a href="/"><img src="{{ url_for('static', filename='images/logo.png') }}" alt="Laurion"></a>
+  </div>
+  <button class="nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+  <div class="nav-overlay"></div>
+  <div class="nav-links">
+    <button class="nav-close" aria-label="Close menu">✕</button>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/classes">Classes</a>
+    <a href="/apply">🎓 Apply</a>
+    <a href="/planner">Planner</a>
+    <a href="/notes">Notes</a>
+    {% if session.get('role') == 'teacher' %}
+    <a href="/teacher">My Materials</a>
+    <a href="/upload">+ Upload</a>
+    {% endif %}
+    {% if session.get('user') == 'admin' or session.get('role') == 'admin' %}
+    <a href="/admin" style="color:#c4b5fd;font-weight:700;">⚙ Admin</a>
+    {% endif %}
+    <a href="/logout">Logout</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="nbt-hero">
+  <div class="badge" style="justify-content:center;position:relative;z-index:1;">🎯 NBT Test Preparation</div>
+  <h1>Prepare for the <span>NBT</span></h1>
+  <p>Access study materials uploaded by your teacher to help you prepare for the National Benchmark Tests — the gateway to university admission.</p>
+  <div class="nbt-hero-stats">
+    <div class="nbt-hero-stat">
+      <div class="num">3</div>
+      <div class="lbl">Tests</div>
+    </div>
+    <div class="nbt-hero-stat">
+      <div class="num">3½h</div>
+      <div class="lbl">Duration</div>
+    </div>
+    <div class="nbt-hero-stat">
+      <div class="num">R400</div>
+      <div class="lbl">Fee (2025)</div>
+    </div>
+    <div class="nbt-hero-stat">
+      <div class="num">{{ (materials.nbt_al | length) + (materials.nbt_mat | length) + (materials.nbt_ql | length) }}</div>
+      <div class="lbl">Resources</div>
+    </div>
+  </div>
+</div>
+
+<div class="nbt-wrapper">
+
+  <!-- QUICK INFO -->
+  <div class="info-strip">
+    <div class="info-tile">
+      <div class="ic">📋</div>
+      <div>
+        <h4>Who must write it?</h4>
+        <p>Students applying to universities that require the NBT. Check your institution's website to confirm.</p>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="ic">📅</div>
+      <div>
+        <h4>When do you write?</h4>
+        <p>At official NBTP venues across SA. Registration opens from June each year. You may write multiple times.</p>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="ic">💰</div>
+      <div>
+        <h4>Registration Fee</h4>
+        <p>Approximately <strong>R400</strong> for 2025. Register early at <strong>nbt.ac.za</strong> — venues fill up fast.</p>
+      </div>
+    </div>
+    <div class="info-tile">
+      <div class="ic">📊</div>
+      <div>
+        <h4>How results work</h4>
+        <p>Classified as Proficient, Intermediate, or Basic. Used alongside your APS score for admission decisions.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── AL SECTION ── -->
+  <div class="nbt-section">
+    <div class="nbt-section-header al">
+      <div class="nbt-section-icon">📖</div>
+      <div>
+        <h2>Academic Literacy (AL)</h2>
+        <p>Reading comprehension, vocabulary, inference &amp; text structure — no isolated grammar rules</p>
+      </div>
+      <span class="nbt-section-count">{{ materials.nbt_al | length }} file{{ 's' if materials.nbt_al | length != 1 }}</span>
+    </div>
+    <div class="nbt-materials al">
+      {% if materials.nbt_al %}
+        {% for m in materials.nbt_al %}
+        <div class="material-row">
+          <div class="mat-icon">{{ get_file_icon(m.filename) }}</div>
+          <div class="mat-info">
+            <h4>{{ m.title }}</h4>
+            <span>Uploaded by {{ m.uploaded_by }} &nbsp;·&nbsp; {{ m.downloads }} download{{ 's' if m.downloads != 1 }}</span>
+          </div>
+          <div class="mat-actions">
+            <a href="/download/{{ m.id }}" class="mat-btn mat-btn-primary">⬇ Download</a>
+            {% if session.get('role') == 'teacher' and session.get('user') == m.uploaded_by %}
+            <a href="/delete_material/{{ m.id }}" class="mat-btn mat-btn-danger"
+               onclick="return confirm('Delete this file?')">🗑</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="nbt-empty">
+          <div class="empty-icon">📭</div>
+          <h4>No materials yet</h4>
+          <p>Your teacher will upload Academic Literacy resources here soon. Check back later!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── MAT SECTION ── -->
+  <div class="nbt-section">
+    <div class="nbt-section-header mat">
+      <div class="nbt-section-icon">📐</div>
+      <div>
+        <h2>Mathematics (MAT)</h2>
+        <p>Algebra, functions, geometry, trigonometry, data handling &amp; basic calculus — Grade 12 level</p>
+      </div>
+      <span class="nbt-section-count">{{ materials.nbt_mat | length }} file{{ 's' if materials.nbt_mat | length != 1 }}</span>
+    </div>
+    <div class="nbt-materials mat">
+      {% if materials.nbt_mat %}
+        {% for m in materials.nbt_mat %}
+        <div class="material-row">
+          <div class="mat-icon">{{ get_file_icon(m.filename) }}</div>
+          <div class="mat-info">
+            <h4>{{ m.title }}</h4>
+            <span>Uploaded by {{ m.uploaded_by }} &nbsp;·&nbsp; {{ m.downloads }} download{{ 's' if m.downloads != 1 }}</span>
+          </div>
+          <div class="mat-actions">
+            <a href="/download/{{ m.id }}" class="mat-btn mat-btn-primary">⬇ Download</a>
+            {% if session.get('role') == 'teacher' and session.get('user') == m.uploaded_by %}
+            <a href="/delete_material/{{ m.id }}" class="mat-btn mat-btn-danger"
+               onclick="return confirm('Delete this file?')">🗑</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="nbt-empty">
+          <div class="empty-icon">📭</div>
+          <h4>No materials yet</h4>
+          <p>Your teacher will upload Mathematics resources here soon. Check back later!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- ── QL SECTION ── -->
+  <div class="nbt-section">
+    <div class="nbt-section-header ql">
+      <div class="nbt-section-icon">📊</div>
+      <div>
+        <h2>Quantitative Literacy (QL)</h2>
+        <p>Percentages, graphs, tables, ratios, financial calculations &amp; estimation in everyday contexts</p>
+      </div>
+      <span class="nbt-section-count">{{ materials.nbt_ql | length }} file{{ 's' if materials.nbt_ql | length != 1 }}</span>
+    </div>
+    <div class="nbt-materials ql">
+      {% if materials.nbt_ql %}
+        {% for m in materials.nbt_ql %}
+        <div class="material-row">
+          <div class="mat-icon">{{ get_file_icon(m.filename) }}</div>
+          <div class="mat-info">
+            <h4>{{ m.title }}</h4>
+            <span>Uploaded by {{ m.uploaded_by }} &nbsp;·&nbsp; {{ m.downloads }} download{{ 's' if m.downloads != 1 }}</span>
+          </div>
+          <div class="mat-actions">
+            <a href="/download/{{ m.id }}" class="mat-btn mat-btn-primary">⬇ Download</a>
+            {% if session.get('role') == 'teacher' and session.get('user') == m.uploaded_by %}
+            <a href="/delete_material/{{ m.id }}" class="mat-btn mat-btn-danger"
+               onclick="return confirm('Delete this file?')">🗑</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="nbt-empty">
+          <div class="empty-icon">📭</div>
+          <h4>No materials yet</h4>
+          <p>Your teacher will upload Quantitative Literacy resources here soon. Check back later!</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- STUDY TIPS -->
+  <div class="card">
+    <h2 style="font-size:1.2rem;color:var(--secondary);margin-bottom:18px;">💡 Top NBT Study Tips</h2>
+    <div class="tips-row">
+      <div class="tip-card">
+        <div class="tip-num">1</div>
+        <h4>Start Early</h4>
+        <p>Begin at least 3 months before your test date. Skills-based tests cannot be crammed.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">2</div>
+        <h4>Read Every Day</h4>
+        <p>Academic Literacy improves through reading — news articles, editorials and academic texts help most.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">3</div>
+        <h4>Revise Grade 12 Maths</h4>
+        <p>The MAT test is curriculum-based. Strong Grade 12 maths revision is your best MAT strategy.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">4</div>
+        <h4>Practise with Data</h4>
+        <p>For QL, practise reading graphs and tables. Work with real-life percentages and financial scenarios.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">5</div>
+        <h4>Time Yourself</h4>
+        <p>Practise under timed conditions — the NBT is a long sitting and time management is key.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-num">6</div>
+        <h4>Register Early</h4>
+        <p>Venues fill up! Register at <strong>nbt.ac.za</strong> as soon as registration opens each year.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLY STRIP -->
+  <div class="apply-strip">
+    <div>
+      <h3>Need Help with NSFAS or University Applications? 🎓</h3>
+      <p>Get step-by-step guidance for NSFAS applications, university admissions, and APS advice — WhatsApp us directly.</p>
+    </div>
+    <div class="apply-strip-btns">
+      <a href="/apply" class="btn">🎓 Apply Page</a>
+      <a href="https://wa.me/27799763190?text=Hi!%20I%20need%20help%20with%20NBT%20preparation%20and%20university%20applications." target="_blank" class="wa-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp Help
+      </a>
+    </div>
+  </div>
+
+</div><!-- /nbt-wrapper -->
+
+<script src="{{ url_for('static', filename='school.js') }}"></script>
+
+<!-- BOTTOM TAB BAR -->
+<nav class="bottom-nav">
+  <a href="/dashboard"><span class="tab-icon">🏠</span><span class="tab-label">Home</span></a>
+  <a href="/classes"><span class="tab-icon">📚</span><span class="tab-label">Classes</span></a>
+  <a href="/apply"><span class="tab-icon">🎓</span><span class="tab-label">Apply</span></a>
+  <a href="/planner"><span class="tab-icon">📅</span><span class="tab-label">Planner</span></a>
+  <a href="/logout" class="tab-logout"><span class="tab-icon">👋</span><span class="tab-label">Logout</span></a>
+</nav>
+</body>
+</html>

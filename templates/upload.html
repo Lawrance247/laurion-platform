@@ -60,19 +60,26 @@
 
       <div class="form-group">
         <label>Subject</label>
-        <select name="subject" required>
+        <select name="subject" id="subjectSelect" required onchange="handleSubjectChange()">
           <option value="">Select a subject</option>
-          <option value="math">Mathematics</option>
-          <option value="phy">Physical Science</option>
-          <option value="ls">Life Science</option>
-          <option value="geo">Geography</option>
-          <option value="acc">Accounting</option>
+          <optgroup label="── Grade Subjects ──">
+            <option value="math">Mathematics</option>
+            <option value="phy">Physical Science</option>
+            <option value="ls">Life Science</option>
+            <option value="geo">Geography</option>
+            <option value="acc">Accounting</option>
+          </optgroup>
+          <optgroup label="── NBT Resources ──">
+            <option value="nbt_al">NBT – Academic Literacy</option>
+            <option value="nbt_mat">NBT – Mathematics</option>
+            <option value="nbt_ql">NBT – Quantitative Literacy</option>
+          </optgroup>
         </select>
       </div>
 
-      <div class="form-group">
+      <div class="form-group" id="gradeGroup">
         <label>Grade</label>
-        <select name="grade" required>
+        <select name="grade" id="gradeSelect">
           <option value="">Select a grade</option>
           <option value="8">Grade 8</option>
           <option value="9">Grade 9</option>
@@ -121,6 +128,16 @@
 </div>
 
 <script>
+function handleSubjectChange() {
+  const subject = document.getElementById("subjectSelect").value;
+  const gradeGroup = document.getElementById("gradeGroup");
+  const gradeSelect = document.getElementById("gradeSelect");
+  const isNbt = subject.startsWith("nbt_");
+  gradeGroup.style.display = isNbt ? "none" : "";
+  gradeSelect.required = !isNbt;
+  if (isNbt) gradeSelect.value = "";
+}
+
 const dropArea = document.getElementById("dropArea");
 const fileInput = document.getElementById("fileInput");
 const preview  = document.getElementById("filePreview");

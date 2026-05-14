@@ -154,172 +154,46 @@
   <!-- NBT PANEL -->
   <div class="sw-panel" id="panel-nbt">
 
-    <div class="nbt-hero">
-      <div class="nbt-hero-text">
-        <div class="badge" style="margin-bottom:14px;">🎯 NBT Test Prep</div>
-        <h2>National Benchmark Tests <span>(NBT)</span></h2>
-        <p>Required by many South African universities for admission. It tests your Academic Literacy, Quantitative Literacy, and Mathematics — results are used alongside your APS score to assess university readiness.</p>
-      </div>
-      <div class="nbt-stats">
-        <div class="nbt-stat"><div class="num">3</div><div class="lbl">Tests</div></div>
-        <div class="nbt-stat"><div class="num">3½h</div><div class="lbl">Duration</div></div>
-        <div class="nbt-stat"><div class="num">R200</div><div class="lbl">Approx. Fee</div></div>
-      </div>
-    </div>
-
-    <!-- What is NBT -->
-    <div class="card" style="margin-bottom:24px;">
-      <h2 style="font-size:1.3rem;color:var(--secondary);margin-bottom:20px;">What is the NBT?</h2>
-      <div class="nbt-info-grid">
-        <div class="nbt-info-card"><div class="ic">📋</div><h3>Who must write it?</h3><p>All students applying to universities that require the NBT. Check your chosen university's website to confirm.</p></div>
-        <div class="nbt-info-card"><div class="ic">📅</div><h3>When do you write?</h3><p>Tests are written at official NBTP venues around SA. Registration opens from June. You can write multiple times.</p></div>
-        <div class="nbt-info-card"><div class="ic">📊</div><h3>How are results used?</h3><p>Results are classified as Proficient, Intermediate, or Basic. Some faculties use them to place you in extended programmes.</p></div>
-        <div class="nbt-info-card"><div class="ic">🌐</div><h3>How to register?</h3><p>Register at <strong>nbt.ac.za</strong>. You need your ID, matric number, and payment. Apply early — venues fill up fast!</p></div>
+    <!-- Hero redirect card -->
+    <div style="background:linear-gradient(145deg,#0b1f3a,#1a3c5e);border-radius:var(--radius-xl);padding:56px 40px;text-align:center;position:relative;overflow:hidden;margin-bottom:24px;">
+      <div style="position:absolute;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(26,158,92,0.2) 0%,transparent 70%);top:-120px;left:50%;transform:translateX(-50%);pointer-events:none;"></div>
+      <div style="position:relative;z-index:1;">
+        <div style="font-size:3rem;margin-bottom:16px;">🎯</div>
+        <h2 style="font-size:1.8rem;color:#fff;margin-bottom:12px;">NBT Preparation Materials</h2>
+        <p style="color:rgba(255,255,255,0.7);font-size:15px;max-width:480px;margin:0 auto 28px;line-height:1.75;">
+          Access study materials uploaded by your teacher for all 3 NBT tests — Academic Literacy, Mathematics, and Quantitative Literacy.
+        </p>
+        <a href="/nbt" class="btn" style="font-size:15px;padding:14px 32px;">📂 Open NBT Resources →</a>
       </div>
     </div>
 
-    <!-- 3 Tests -->
-    <h2 style="font-size:1.3rem;color:var(--secondary);margin-bottom:18px;">The 3 NBT Tests</h2>
-    <div class="nbt-tests-grid">
-
-      <div class="nbt-test-card al">
-        <div class="nbt-test-badge">📖 Academic Literacy (AL)</div>
-        <h3>Academic Literacy</h3>
-        <p>Tests your ability to understand and use written language for academic study. Focuses on comprehension and reasoning — not grammar rules in isolation.</p>
-        <div class="nbt-topics">
-          <span class="nbt-topic">Reading comprehension</span>
-          <span class="nbt-topic">Vocabulary in context</span>
-          <span class="nbt-topic">Text structure</span>
-          <span class="nbt-topic">Inference & reasoning</span>
-          <span class="nbt-topic">Understanding graphs</span>
-          <span class="nbt-topic">Academic conventions</span>
-        </div>
-        <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">⏱ ~3 hours (combined with QL) &nbsp;|&nbsp; 🌍 English or Afrikaans</p>
-        <div class="nbt-test-actions">
-          <a href="https://nbt.ac.za/content/al-sample-test" target="_blank" rel="noopener" class="btn" style="font-size:12.5px;padding:8px 16px;">📄 Official Sample</a>
-          <a href="https://www.nbt.ac.za" target="_blank" rel="noopener" class="btn" style="background:var(--secondary);font-size:12.5px;padding:8px 16px;">🌐 nbt.ac.za</a>
-        </div>
+    <!-- Quick info tiles -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px;">
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;">
+        <div style="font-size:1.4rem;margin-bottom:10px;">📖</div>
+        <h4 style="font-size:14px;color:var(--secondary);margin-bottom:6px;font-weight:700;">Academic Literacy (AL)</h4>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.6;">Reading comprehension, vocabulary in context, inference and text structure.</p>
       </div>
-
-      <div class="nbt-test-card mat">
-        <div class="nbt-test-badge" style="background:rgba(59,130,246,0.1);color:#3b82f6;">📐 Mathematics (MAT)</div>
-        <h3>Mathematics</h3>
-        <p>Tests mathematical knowledge needed for demanding programmes. Based on your Grade 12 Maths syllabus — strong matric maths = strong NBT MAT.</p>
-        <div class="nbt-topics">
-          <span class="nbt-topic">Algebra & functions</span>
-          <span class="nbt-topic">Number systems</span>
-          <span class="nbt-topic">Geometry & trigonometry</span>
-          <span class="nbt-topic">Data & probability</span>
-          <span class="nbt-topic">Patterns & sequences</span>
-          <span class="nbt-topic">Basic calculus</span>
-        </div>
-        <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">⏱ ~3 hours (separate sitting) &nbsp;|&nbsp; 📌 Required for: Engineering, BSc, Actuarial Science</p>
-        <div class="nbt-test-actions">
-          <a href="https://nbt.ac.za/content/mat-sample-test" target="_blank" rel="noopener" class="btn" style="background:#3b82f6;font-size:12.5px;padding:8px 16px;">📄 Official Sample</a>
-          <a href="https://www.nbt.ac.za" target="_blank" rel="noopener" class="btn" style="background:var(--secondary);font-size:12.5px;padding:8px 16px;">🌐 nbt.ac.za</a>
-        </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;">
+        <div style="font-size:1.4rem;margin-bottom:10px;">📐</div>
+        <h4 style="font-size:14px;color:var(--secondary);margin-bottom:6px;font-weight:700;">Mathematics (MAT)</h4>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.6;">Algebra, functions, geometry, trigonometry and data handling — Grade 12 level.</p>
       </div>
-
-      <div class="nbt-test-card ql">
-        <div class="nbt-test-badge" style="background:rgba(245,158,11,0.1);color:#d97706;">📊 Quantitative Literacy (QL)</div>
-        <h3>Quantitative Literacy</h3>
-        <p>Tests ability to manage and interpret quantitative information in everyday contexts. More applied and practical than the Maths test.</p>
-        <div class="nbt-topics">
-          <span class="nbt-topic">Percentages & ratios</span>
-          <span class="nbt-topic">Reading graphs & tables</span>
-          <span class="nbt-topic">Number relationships</span>
-          <span class="nbt-topic">Spatial reasoning</span>
-          <span class="nbt-topic">Financial calculations</span>
-          <span class="nbt-topic">Estimation</span>
-        </div>
-        <p style="font-size:12.5px;color:var(--muted);margin-bottom:14px;">⏱ ~3 hours (combined with AL) &nbsp;|&nbsp; 📌 Required for most university applications</p>
-        <div class="nbt-test-actions">
-          <a href="https://nbt.ac.za/content/ql-sample-test" target="_blank" rel="noopener" class="btn" style="background:#d97706;font-size:12.5px;padding:8px 16px;">📄 Official Sample</a>
-          <a href="https://www.nbt.ac.za" target="_blank" rel="noopener" class="btn" style="background:var(--secondary);font-size:12.5px;padding:8px 16px;">🌐 nbt.ac.za</a>
-        </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;">
+        <div style="font-size:1.4rem;margin-bottom:10px;">📊</div>
+        <h4 style="font-size:14px;color:var(--secondary);margin-bottom:6px;font-weight:700;">Quantitative Literacy (QL)</h4>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.6;">Percentages, graphs, tables, ratios and financial calculations in everyday contexts.</p>
+      </div>
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;">
+        <div style="font-size:1.4rem;margin-bottom:10px;">💰</div>
+        <h4 style="font-size:14px;color:var(--secondary);margin-bottom:6px;font-weight:700;">Registration Fee</h4>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.6;">Approximately <strong>R400</strong> for 2025. Register at <strong>nbt.ac.za</strong> — venues fill up fast.</p>
       </div>
     </div>
 
-    <!-- Resources -->
-    <div class="nbt-resources">
-      <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
-        <div style="width:46px;height:46px;border-radius:12px;background:rgba(26,158,92,0.1);display:flex;align-items:center;justify-content:center;font-size:1.4rem;">📂</div>
-        <div>
-          <h2 style="font-size:1.2rem;color:var(--secondary);">NBT Study Resources</h2>
-          <p style="font-size:13px;color:var(--text-sub);">Practice materials to help you prepare for test day</p>
-        </div>
-      </div>
-      <div class="resource-list">
-        <div class="resource-item">
-          <div class="resource-icon" style="background:rgba(26,158,92,0.1);">📘</div>
-          <div><h4>NBT Academic Literacy — Official Sample Test</h4><p>Official NBTP sample questions for AL • PDF</p></div>
-          <a href="https://nbt.ac.za/content/al-sample-test" target="_blank" rel="noopener" class="resource-btn">↓ Download</a>
-        </div>
-        <div class="resource-item">
-          <div class="resource-icon" style="background:rgba(59,130,246,0.1);">📐</div>
-          <div><h4>NBT Mathematics — Official Sample Test</h4><p>Official NBTP sample questions for MAT • PDF</p></div>
-          <a href="https://nbt.ac.za/content/mat-sample-test" target="_blank" rel="noopener" class="resource-btn">↓ Download</a>
-        </div>
-        <div class="resource-item">
-          <div class="resource-icon" style="background:rgba(245,158,11,0.1);">📊</div>
-          <div><h4>NBT Quantitative Literacy — Official Sample Test</h4><p>Official NBTP sample questions for QL • PDF</p></div>
-          <a href="https://nbt.ac.za/content/ql-sample-test" target="_blank" rel="noopener" class="resource-btn">↓ Download</a>
-        </div>
-        <div class="resource-item">
-          <div class="resource-icon" style="background:rgba(26,158,92,0.08);">📋</div>
-          <div><h4>Grade 12 NSC Maths Past Papers (2020–2024)</h4><p>NSC past papers — excellent NBT MAT preparation</p></div>
-          <a href="https://www.education.gov.za/Curriculum/NationalSeniorCertificate/NSCPastExaminationpapers.aspx" target="_blank" rel="noopener" class="resource-btn">↓ Access</a>
-        </div>
-        <div class="resource-item">
-          <div class="resource-icon" style="background:rgba(124,58,237,0.1);">🌐</div>
-          <div><h4>NBT Registration Portal (nbt.ac.za)</h4><p>Register for your NBT test, find venues and dates</p></div>
-          <a href="https://www.nbt.ac.za" target="_blank" rel="noopener" class="resource-btn">🌐 Visit</a>
-        </div>
-      </div>
+    <div style="text-align:center;">
+      <a href="/nbt" class="btn" style="font-size:14px;padding:13px 28px;">📂 View All NBT Materials →</a>
     </div>
-
-    <!-- Tips -->
-    <div class="card" style="margin-bottom:24px;">
-      <h2 style="font-size:1.25rem;color:var(--secondary);margin-bottom:18px;">💡 Top NBT Preparation Tips</h2>
-      <div class="tips-grid">
-        <div class="tip-card"><div class="tip-num">1</div><h4>Start Early</h4><p>Begin NBT prep at least 3 months before your test. Last-minute cramming doesn't work for skills-based tests.</p></div>
-        <div class="tip-card"><div class="tip-num">2</div><h4>Use Official Samples</h4><p>Do the official NBTP sample tests under timed conditions to understand exactly what to expect.</p></div>
-        <div class="tip-card"><div class="tip-num">3</div><h4>Read Every Day</h4><p>Academic Literacy improves through regular reading — articles, editorials, academic texts, not just social media.</p></div>
-        <div class="tip-card"><div class="tip-num">4</div><h4>Revise Grade 12 Maths</h4><p>The MAT test is curriculum-based. Strong Grade 12 maths revision is your best MAT preparation strategy.</p></div>
-        <div class="tip-card"><div class="tip-num">5</div><h4>Practise with Data</h4><p>For QL, practise reading graphs and tables. Work with real-life percentages, ratios and financial scenarios.</p></div>
-        <div class="tip-card"><div class="tip-num">6</div><h4>Register on Time</h4><p>NBT venues fill up! Register as soon as registration opens and choose a venue close to home.</p></div>
-      </div>
-    </div>
-
-    <!-- Universities using NBT -->
-    <div class="card" style="margin-bottom:24px;">
-      <h2 style="font-size:1.25rem;color:var(--secondary);margin-bottom:8px;">🏫 Universities That Require the NBT</h2>
-      <p style="font-size:13.5px;color:var(--text-sub);margin-bottom:18px;">Always confirm on each university's official website:</p>
-      <div>
-        <span class="uni-pill">UCT</span>
-        <span class="uni-pill">Wits</span>
-        <span class="uni-pill">Stellenbosch</span>
-        <span class="uni-pill">University of Pretoria</span>
-        <span class="uni-pill">UKZN</span>
-        <span class="uni-pill">Rhodes</span>
-        <span class="uni-pill">UFH</span>
-        <span class="uni-pill">University of the Free State</span>
-        <span class="uni-pill">North-West University</span>
-        <span class="uni-pill">University of Limpopo</span>
-      </div>
-    </div>
-
-    <div class="apply-strip">
-      <div>
-        <h3>Need NBT Prep Help or Application Assistance? 📲</h3>
-        <p>Get personalised guidance for NBT preparation, NSFAS applications, and university admissions.</p>
-      </div>
-      <div class="apply-strip-btns">
-        <a href="/apply" class="btn">🎓 Apply Page</a>
-        <a href="https://wa.me/27799763190?text=Hi!%20I%20need%20help%20with%20NBT%20preparation." target="_blank" class="btn" style="background:#25D366;">💬 WhatsApp Help</a>
-      </div>
-    </div>
-
   </div><!-- /panel-nbt -->
 </div>
 

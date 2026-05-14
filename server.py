@@ -45,6 +45,16 @@ SUBJECT_ICONS = {
     "math": "📊", "phy": "⚛️", "ls": "🌿", "geo": "🌍", "acc": "📈",
 }
 
+# NBT sections — stored as subject=nbt_al/nbt_mat/nbt_ql, grade=0
+NBT_SECTIONS = {
+    "nbt_al":  "NBT – Academic Literacy",
+    "nbt_mat": "NBT – Mathematics",
+    "nbt_ql":  "NBT – Quantitative Literacy",
+}
+NBT_ICONS = {
+    "nbt_al": "📖", "nbt_mat": "📐", "nbt_ql": "📊",
+}
+
 # ── MODELS ────────────────────────────────────────────────────────────────────
 
 class User(db.Model):
@@ -228,6 +238,16 @@ def classes():
 def apply():
     return render_template("apply.html")
 
+@app.route("/nbt")
+@login_required
+def nbt():
+    materials = {
+        "nbt_al":  Material.query.filter_by(subject="nbt_al",  grade=0).order_by(Material.id.desc()).all(),
+        "nbt_mat": Material.query.filter_by(subject="nbt_mat", grade=0).order_by(Material.id.desc()).all(),
+        "nbt_ql":  Material.query.filter_by(subject="nbt_ql",  grade=0).order_by(Material.id.desc()).all(),
+    }
+    return render_template("nbt.html", materials=materials, get_file_icon=get_file_icon, NBT_SECTIONS=NBT_SECTIONS, NBT_ICONS=NBT_ICONS)
+
 @app.route("/grade/<int:grade>")
 @login_required
 def grade(grade):
@@ -302,6 +322,10 @@ def upload():
         subject = request.form.get("subject","")
         grade   = request.form.get("grade","")
         file    = request.files.get("file")
+        # NBT materials use grade=0
+        is_nbt = subject in NBT_SECTIONS
+        if is_nbt:
+            grade = "0"
         if not title or not subject or not grade or not file or not file.filename:
             error = "Please fill in all fields and select a file."
         elif not allowed_file(file.filename):
@@ -321,6 +345,8 @@ def upload():
             db.session.add(Material(title=title, filename=file_url, subject=subject,
                                     grade=int(grade), uploaded_by=session["user"]))
             db.session.commit()
+            if is_nbt:
+                return redirect("/nbt")
             return redirect(f"/subject/{grade}/{subject}")
     return render_template("upload.html", error=error)
 
@@ -340,8 +366,11 @@ def delete_material(id):
             cloudinary.uploader.destroy(public_id.rsplit(".", 1)[0], resource_type="raw")
     except Exception:
         pass
+    was_nbt = material.subject in NBT_SECTIONS
     db.session.delete(material)
     db.session.commit()
+    if was_nbt:
+        return redirect("/nbt")
     return redirect("/teacher")
 
 @app.route("/planner", methods=["GET", "POST"])

@@ -34,15 +34,121 @@ cloudinary.config(
 # ── ADMIN CONFIG ─────────────────────────────────────────────────────────────
 ADMIN_USERNAME = "LawranceFounder"
 
-SUBJECTS = {
-    "math": "Mathematics",
-    "phy":  "Physical Science",
-    "ls":   "Life Science",
-    "geo":  "Geography",
-    "acc":  "Accounting",
+# ── CAPS SUBJECTS BY PHASE ────────────────────────────────────────────────
+# Senior Phase: Grades 8–9 (compulsory + common electives)
+SUBJECTS_GR89 = {
+    "eng":   "English Home Language",
+    "afr":   "Afrikaans First Additional Language",
+    "math":  "Mathematics",
+    "ns":    "Natural Sciences",
+    "ss":    "Social Sciences",
+    "ems":   "Economic Management Sciences",
+    "tech":  "Technology",
+    "lo":    "Life Orientation",
+    "ca":    "Creative Arts",
+    "isizulu": "IsiZulu",
+    "isixhosa":"IsiXhosa",
+    "sesotho": "Sesotho",
+    "setswana":"Setswana",
 }
+
+# FET Phase: Grades 10–12
+SUBJECTS_FET = {
+    # Languages (compulsory)
+    "eng":   "English Home Language",
+    "afr":   "Afrikaans First Additional Language",
+    "isizulu": "IsiZulu",
+    "isixhosa":"IsiXhosa",
+    "sesotho": "Sesotho",
+    "setswana":"Setswana",
+    "sepedi":  "Sepedi",
+    "xitsonga":"Xitsonga",
+    "tshivenda":"Tshivenda",
+    "siswati": "Siswati",
+    "isindebele":"IsiNdebele",
+    # Compulsory
+    "lo":    "Life Orientation",
+    # Mathematics stream
+    "math":  "Mathematics",
+    "mlit":  "Mathematical Literacy",
+    "techmath":"Technical Mathematics",
+    # Sciences
+    "phy":   "Physical Sciences",
+    "techsci":"Technical Sciences",
+    "ls":    "Life Sciences",
+    "agri":  "Agricultural Sciences",
+    "ms":    "Marine Sciences",
+    # Commerce
+    "acc":   "Accounting",
+    "bs":    "Business Studies",
+    "econ":  "Economics",
+    # Humanities
+    "geo":   "Geography",
+    "hist":  "History",
+    "reli":  "Religion Studies",
+    # Technology
+    "it":    "Information Technology",
+    "cat":   "Computer Applications Technology",
+    "egd":   "Engineering Graphics & Design",
+    "mechtech":"Mechanical Technology",
+    "elecserv":"Electrical Technology",
+    "civiltech":"Civil Technology",
+    "agritech":"Agricultural Technology",
+    # Arts
+    "drama": "Dramatic Arts",
+    "music": "Music",
+    "visart":"Visual Arts",
+    "design":"Design",
+    # Consumer
+    "cons":  "Consumer Studies",
+    "hosp":  "Hospitality Studies",
+    "tour":  "Tourism",
+    # Sport & Physical
+    "sportsc":"Sport & Exercise Science",
+}
+
+# Combined for general use (upload form, subject pages etc.)
+SUBJECTS = {**SUBJECTS_GR89, **SUBJECTS_FET}
+# Deduplicate while preserving order
+_seen = set()
+SUBJECTS = {k: v for k, v in SUBJECTS.items() if not (_seen.add(k) or k in _seen)}
+
 SUBJECT_ICONS = {
-    "math": "📊", "phy": "⚛️", "ls": "🌿", "geo": "🌍", "acc": "📈",
+    "eng":"🇬🇧", "afr":"🇿🇦", "isizulu":"🗣️", "isixhosa":"🗣️",
+    "sesotho":"🗣️","setswana":"🗣️","sepedi":"🗣️","xitsonga":"🗣️",
+    "tshivenda":"🗣️","siswati":"🗣️","isindebele":"🗣️",
+    "math":"📊","mlit":"📐","techmath":"🔢",
+    "phy":"⚛️","techsci":"🔬","ls":"🌿","agri":"🌾","ms":"🐟",
+    "ns":"🔭","ss":"🌍","ems":"💰","tech":"⚙️",
+    "lo":"🧠","ca":"🎨",
+    "acc":"📈","bs":"💼","econ":"💹",
+    "geo":"🗺️","hist":"📜","reli":"✝️",
+    "it":"💻","cat":"🖥️","egd":"📏",
+    "mechtech":"🔧","elecserv":"⚡","civiltech":"🏗️","agritech":"🚜",
+    "drama":"🎭","music":"🎵","visart":"🖌️","design":"✏️",
+    "cons":"🛒","hosp":"🍽️","tour":"✈️",
+    "sportsc":"🏃",
+}
+
+# Per-grade subject availability
+GRADE_SUBJECTS = {
+    8:  ["eng","afr","isizulu","isixhosa","sesotho","setswana","math","ns","ss","ems","tech","lo","ca"],
+    9:  ["eng","afr","isizulu","isixhosa","sesotho","setswana","math","ns","ss","ems","tech","lo","ca"],
+    10: ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele",
+         "lo","math","mlit","techmath","phy","techsci","ls","agri","ms","ns",
+         "acc","bs","econ","geo","hist","reli",
+         "it","cat","egd","mechtech","elecserv","civiltech","agritech",
+         "drama","music","visart","design","cons","hosp","tour","sportsc"],
+    11: ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele",
+         "lo","math","mlit","techmath","phy","techsci","ls","agri","ms",
+         "acc","bs","econ","geo","hist","reli",
+         "it","cat","egd","mechtech","elecserv","civiltech","agritech",
+         "drama","music","visart","design","cons","hosp","tour","sportsc"],
+    12: ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele",
+         "lo","math","mlit","techmath","phy","techsci","ls","agri","ms",
+         "acc","bs","econ","geo","hist","reli",
+         "it","cat","egd","mechtech","elecserv","civiltech","agritech",
+         "drama","music","visart","design","cons","hosp","tour","sportsc"],
 }
 
 # NBT sections — stored as subject=nbt_al/nbt_mat/nbt_ql, grade=0
@@ -255,7 +361,10 @@ def nbt():
 def grade(grade):
     if grade not in range(8, 13):
         return redirect("/classes")
-    return render_template("grade.html", grade=grade, subjects=SUBJECTS, icons=SUBJECT_ICONS)
+    # Only show subjects relevant to this grade
+    grade_codes = GRADE_SUBJECTS.get(grade, list(SUBJECTS.keys()))
+    grade_subjects = {k: SUBJECTS[k] for k in grade_codes if k in SUBJECTS}
+    return render_template("grade.html", grade=grade, subjects=grade_subjects, icons=SUBJECT_ICONS)
 
 @app.route("/subject/<int:grade>/<code>")
 @login_required

@@ -151,14 +151,14 @@ GRADE_SUBJECTS = {
          "drama","music","visart","design","cons","hosp","tour","sportsc"],
 }
 
-# NBT sections — stored as subject=nbt_al/nbt_mat/nbt_ql, grade=0
+# NBT sections — 2 tests: AQL (Academic & Quantitative Literacy) + MAT
+# stored as subject=nbt_aql/nbt_mat, grade=0
 NBT_SECTIONS = {
-    "nbt_al":  "NBT – Academic Literacy",
-    "nbt_mat": "NBT – Mathematics",
-    "nbt_ql":  "NBT – Quantitative Literacy",
+    "nbt_aql": "NBT – Academic & Quantitative Literacy (AQL)",
+    "nbt_mat": "NBT – Mathematics (MAT)",
 }
 NBT_ICONS = {
-    "nbt_al": "📖", "nbt_mat": "📐", "nbt_ql": "📊",
+    "nbt_aql": "📖", "nbt_mat": "📐",
 }
 
 # ── MODELS ────────────────────────────────────────────────────────────────────
@@ -350,9 +350,8 @@ def apply():
 @login_required
 def nbt():
     materials = {
-        "nbt_al":  Material.query.filter_by(subject="nbt_al",  grade=0).order_by(Material.id.desc()).all(),
+        "nbt_aql": Material.query.filter_by(subject="nbt_aql", grade=0).order_by(Material.id.desc()).all(),
         "nbt_mat": Material.query.filter_by(subject="nbt_mat", grade=0).order_by(Material.id.desc()).all(),
-        "nbt_ql":  Material.query.filter_by(subject="nbt_ql",  grade=0).order_by(Material.id.desc()).all(),
     }
     return render_template("nbt.html", materials=materials, get_file_icon=get_file_icon, NBT_SECTIONS=NBT_SECTIONS, NBT_ICONS=NBT_ICONS)
 
@@ -361,10 +360,28 @@ def nbt():
 def grade(grade):
     if grade not in range(8, 13):
         return redirect("/classes")
-    # Only show subjects relevant to this grade
     grade_codes = GRADE_SUBJECTS.get(grade, list(SUBJECTS.keys()))
     grade_subjects = {k: SUBJECTS[k] for k in grade_codes if k in SUBJECTS}
-    return render_template("grade.html", grade=grade, subjects=grade_subjects, icons=SUBJECT_ICONS)
+
+    # Build grouped subjects for the template
+    GROUP_DEFS = [
+        ("🗣️ Languages",      ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele"]),
+        ("📊 Mathematics",    ["math","mlit","techmath"]),
+        ("🔬 Sciences",       ["phy","techsci","ls","ns","agri","ms"]),
+        ("💼 Commerce",       ["acc","bs","econ","ems"]),
+        ("🌍 Humanities",     ["geo","hist","ss","reli"]),
+        ("⚙️ Technology",     ["it","cat","egd","tech","mechtech","elecserv","civiltech","agritech"]),
+        ("🎨 Arts & Culture", ["drama","music","visart","design","ca"]),
+        ("🧠 Life & Consumer",["lo","cons","hosp","tour","sportsc"]),
+    ]
+    grouped = []
+    for gname, codes in GROUP_DEFS:
+        items = [(c, grade_subjects[c], SUBJECT_ICONS.get(c,"📘")) for c in codes if c in grade_subjects]
+        if items:
+            grouped.append((gname, items))
+
+    return render_template("grade.html", grade=grade, subjects=grade_subjects,
+                           icons=SUBJECT_ICONS, grouped=grouped)
 
 @app.route("/subject/<int:grade>/<code>")
 @login_required

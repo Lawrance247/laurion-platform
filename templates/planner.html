@@ -73,7 +73,7 @@
     <div class="calendar-day" onclick="showTasks('{{ day }}')" data-day="{{ day }}">
       <div class="day-number">{{ day }}</div>
       {% for task in tasks %}
-        {% if task.date and task.date.day == day %}
+        {% if task.date and (task.date.day == day if task.date.__class__.__name__ == "datetime" else false) %}
         <div class="calendar-task">{{ task.title }}</div>
         {% endif %}
       {% endfor %}
@@ -99,7 +99,7 @@
         <div style="flex:1;">
           <div style="font-size:14.5px;font-weight:600;color:var(--text);">{{ task.title }}</div>
           {% if task.description %}<div style="font-size:13px;color:var(--text-sub);margin-top:2px;">{{ task.description }}</div>{% endif %}
-          <span class="task-time">{{ task.date }}</span>
+          <span class="task-time">{{ task.date.strftime("%d %b %Y %H:%M") if task.date and task.date.__class__.__name__ == "datetime" else task.date or "" }}</span>
         </div>
         <a href="/delete_task/{{ task.id }}" class="delete-btn btn-sm"
            onclick="return confirm('Delete this task?')">🗑</a>
@@ -121,7 +121,7 @@ const tasks = [
   {
     title: {{ task.title|tojson }},
     description: {{ task.description|tojson }},
-    date: "{{ task.date.strftime('%Y-%m-%dT%H:%M:%S') if task.date else '' }}",
+    date: {{ task.date|string|tojson if task.date else '""' }},
     id: {{ task.id }}
   }{% if not loop.last %},{% endif %}
   {% endfor %}

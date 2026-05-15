@@ -205,22 +205,20 @@ def dashboard():
     today_start = datetime.combine(today, datetime.min.time())
     today_end   = datetime.combine(today, datetime.max.time())
 
-    try:
-        from sqlalchemy import cast, DateTime as SADateTime
-        date_col = cast(Planner.date, SADateTime)
-        tasks_today = Planner.query.filter(
-            Planner.user == username,
-            date_col >= today_start,
-            date_col <= today_end,
-        ).order_by(date_col).all()
-        overdue_tasks = Planner.query.filter(
-            Planner.user == username,
-            date_col < today_start,
-        ).order_by(date_col.desc()).all()
-    except Exception:
-        all_tasks = Planner.query.filter_by(user=username).order_by(Planner.id).all()
-        tasks_today   = [t for t in all_tasks if t.date and today_start <= t.date <= today_end]
-        overdue_tasks = [t for t in all_tasks if t.date and t.date < today_start]
+    # Fetch all and filter/sort in Python — avoids DB column type issues
+    def parse_task_date(t):
+        try:
+            if isinstance(t.date, datetime):
+                return t.date
+            if t.date:
+                return datetime.fromisoformat(str(t.date))
+        except Exception:
+            pass
+        return None
+
+    all_tasks     = Planner.query.filter_by(user=username).order_by(Planner.id).all()
+    tasks_today   = sorted([t for t in all_tasks if parse_task_date(t) and today_start <= parse_task_date(t) <= today_end], key=parse_task_date)
+    overdue_tasks = sorted([t for t in all_tasks if parse_task_date(t) and parse_task_date(t) < today_start], key=parse_task_date, reverse=True)
 
     total_downloads   = db.session.query(func.sum(Material.downloads)).scalar() or 0
     popular_materials = Material.query.order_by(Material.downloads.desc()).limit(5).all()
@@ -393,12 +391,19 @@ def planner():
         ))
         db.session.commit()
         return redirect("/planner")
-    try:
-        from sqlalchemy import cast, DateTime as SADateTime
-        date_col = cast(Planner.date, SADateTime)
-        tasks = Planner.query.filter_by(user=session["user"]).order_by(date_col).all()
-    except Exception:
-        tasks = Planner.query.filter_by(user=session["user"]).order_by(Planner.id).all()
+    # Fetch tasks safely — avoid any cast/ordering that depends on column type
+    all_tasks = Planner.query.filter_by(user=session["user"]).order_by(Planner.id).all()
+    # Sort in Python so we never touch the DB column type
+    def safe_date(t):
+        try:
+            if isinstance(t.date, datetime):
+                return t.date
+            if t.date:
+                return datetime.fromisoformat(str(t.date))
+        except Exception:
+            pass
+        return datetime.min
+    tasks = sorted(all_tasks, key=safe_date)
     return render_template("planner.html", tasks=tasks, subjects=SUBJECTS)
 
 @app.route("/delete_task/<int:id>")

@@ -107,11 +107,12 @@ SUBJECTS_FET = {
     "sportsc":"Sport & Exercise Science",
 }
 
-# Combined for general use (upload form, subject pages etc.)
-SUBJECTS = {**SUBJECTS_GR89, **SUBJECTS_FET}
-# Deduplicate while preserving order
-_seen = set()
-SUBJECTS = {k: v for k, v in SUBJECTS.items() if not (_seen.add(k) or k in _seen)}
+# Combined for general use — FET takes priority, GR89-only subjects appended
+SUBJECTS = {**SUBJECTS_FET, **SUBJECTS_GR89}
+# Simple merge: FET already has all subjects, GR89 adds the phase-specific ones
+# Just use a plain merged dict with no broken dedup logic
+SUBJECTS = dict(SUBJECTS_GR89)
+SUBJECTS.update(SUBJECTS_FET)
 
 SUBJECT_ICONS = {
     "eng":"🇬🇧", "afr":"🇿🇦", "isizulu":"🗣️", "isixhosa":"🗣️",

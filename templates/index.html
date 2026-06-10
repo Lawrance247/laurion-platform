@@ -148,7 +148,7 @@
 <section class="cta">
   <div class="container">
     <h2>Start your learning journey today 🚀</h2>
-    <p id="installCountText" style="color:rgba(255,255,255,0.65);font-size:16px;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">🔥 Thousands of students using Laurion</p>
+    <p style="color:rgba(255,255,255,0.65);font-size:16px;margin-bottom:32px;max-width:480px;margin-left:auto;margin-right:auto;">Join thousands of students and teachers already using Laurion.</p>
     <a href="/register" class="btn" style="padding:14px 36px;font-size:16px;">Create Free Account →</a>
   </div>
 </section>
@@ -282,19 +282,15 @@ if (isInstalled) {
 
 <script>
 function cacheInstallCount(count) {
-  try { localStorage.setItem("installCountCache", count); } catch {}
 }
 
 function getCachedInstallCount() {
-  try { return localStorage.getItem("installCountCache"); } catch { return null; }
 }
 
 async function loadInstallCount() {
-  const el = document.getElementById("installCountText");
 
   try {
     const res = await fetch("/install-count");
-    if (!res.ok) throw new Error("non-200");
     const data = await res.json();
 
     cacheInstallCount(data.count);

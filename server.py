@@ -593,8 +593,11 @@ def sync_planner():
 
 @app.route("/install-count")
 def install_count():
-    row = InstallCount.query.first()
-    return jsonify({"count": row.count if row else 0})
+    try:
+        row = InstallCount.query.first()
+        return jsonify({"count": row.count if row else 0})
+    except Exception:
+        return jsonify({"count": 0})
 
 @app.route("/increment-install", methods=["POST"])
 def increment_install():

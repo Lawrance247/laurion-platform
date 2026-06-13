@@ -55,7 +55,7 @@ SUBJECTS_GR89 = {
 # FET Phase: Grades 10–12
 SUBJECTS_FET = {
     # Languages (compulsory)
-    "eng":   "English Home Language",
+    "eng":   "English Home And First Additinal Language",
     "afr":   "Afrikaans First Additional Language",
     "isizulu": "IsiZulu",
     "isixhosa":"IsiXhosa",

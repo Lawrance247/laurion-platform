@@ -46,9 +46,13 @@ PAGE_W, PAGE_H = A4   # 595.28 × 841.89 pt
 FOOTER_LOGO_H  = 28   # pt – logo height in footer
 
 # ── Module-level caches ────────────────────────────────────────────────────────
-_LOGO_CACHE:  Image.Image | None = None
-_COVER_CACHE: bytes | None       = None
-_INNER_CACHE: bytes | None       = None
+_LOGO_CACHE:   Image.Image | None = None
+_COVER_CACHE:  bytes | None       = None
+_INNER_CACHE:  bytes | None       = None
+_HEADER_CACHE: bytes | None       = None
+
+# Height in points to white-out at the top of each page (covers teachme2 header)
+HEADER_WIPEOUT_H = 26
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -78,6 +82,46 @@ def _logo_on_white_bg(logo: Image.Image, pad: int = 3) -> Image.Image:
 def _overlay_to_pdf_page(buf: io.BytesIO):
     """Return first page of a reportlab-generated PDF buffer."""
     return PdfReader(buf).pages[0]
+
+
+# ── Third-party cover/header detection ────────────────────────────────────────
+
+THIRD_PARTY_MARKERS = [
+    "teachme2", "teach me 2", "need an amazing tutor",
+    "exampapers", "stanmore", "wced",
+]
+
+def _is_third_party_cover(page) -> bool:
+    """Return True if this page looks like a third-party cover/ad page."""
+    try:
+        text = page.extract_text() or ""
+        lower = text.lower()
+        return any(marker in lower for marker in THIRD_PARTY_MARKERS)
+    except Exception:
+        return False
+
+
+def _build_header_wipeout_bytes() -> bytes:
+    """
+    Overlay that paints a white rectangle over the top of the page,
+    covering any third-party header text (e.g. teachme2 branding).
+    """
+    buf = io.BytesIO()
+    c   = rl_canvas.Canvas(buf, pagesize=A4)
+    w, h = A4
+    c.setFillColorRGB(1, 1, 1)   # pure white
+    c.rect(0, h - HEADER_WIPEOUT_H, w, HEADER_WIPEOUT_H, fill=1, stroke=0)
+    c.save()
+    buf.seek(0)
+    return buf.read()
+
+
+def _get_header_wipeout() -> io.BytesIO:
+    """Return cached header wipeout overlay as a fresh BytesIO."""
+    global _HEADER_CACHE
+    if _HEADER_CACHE is None:
+        _HEADER_CACHE = _build_header_wipeout_bytes()
+    return io.BytesIO(_HEADER_CACHE)
 
 
 # ── Cover page ─────────────────────────────────────────────────────────────────
@@ -214,14 +258,29 @@ def rebrand_pdf_bytes(pdf_bytes: bytes) -> bytes:
     writer = PdfWriter()
 
     # Build overlays once (cached after first call)
-    cover_page = _overlay_to_pdf_page(_get_cover_overlay())
-    inner_page = _overlay_to_pdf_page(_get_inner_overlay())
+    cover_page   = _overlay_to_pdf_page(_get_cover_overlay())
+    inner_page   = _overlay_to_pdf_page(_get_inner_overlay())
+    wipeout_page = _overlay_to_pdf_page(_get_header_wipeout())
 
-    # Insert branded cover
+    # Insert branded Laurion cover
     writer.add_page(cover_page)
 
-    # Stamp every original page with footer logo
-    for page in reader.pages:
+    pages = list(reader.pages)
+
+    # Detect and skip third-party cover pages at the start
+    # (e.g. teachme2 inserts a blank/ad page as page 1)
+    start_index = 0
+    for i, page in enumerate(pages[:3]):   # only check first 3 pages
+        if _is_third_party_cover(page):
+            start_index = i + 1
+        else:
+            break
+
+    # Stamp every content page: wipe third-party header, then add footer logo
+    for page in pages[start_index:]:
+        # 1. White out any third-party header at the top
+        page.merge_page(wipeout_page)
+        # 2. Stamp Laurion footer logo
         page.merge_page(inner_page)
         writer.add_page(page)
 

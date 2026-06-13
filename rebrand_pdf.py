@@ -52,7 +52,7 @@ _INNER_CACHE:  bytes | None       = None
 _HEADER_CACHE: bytes | None       = None
 
 # Height in points to white-out at the top of each page (covers teachme2 header)
-HEADER_WIPEOUT_H = 26
+HEADER_WIPEOUT_H = 42
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -267,9 +267,26 @@ def rebrand_pdf_bytes(pdf_bytes: bytes) -> bytes:
 
     pages = list(reader.pages)
 
-    # Stamp every page: wipe any third-party header, then add Laurion footer logo
     for page in pages:
-        # 1. White out any third-party header at the top (safe on clean DBE papers)
+        # Skip pure third-party ad pages (e.g. teachme2 "Need an amazing tutor?" page)
+        # These are pages that contain ONLY third-party branding and no exam content.
+        # We detect them by checking: third-party marker present AND no DBE content markers.
+        try:
+            text = (page.extract_text() or "").lower()
+            has_third_party = any(m in text for m in THIRD_PARTY_MARKERS)
+            has_dbe_content = any(m in text for m in [
+                "mathematics", "physical science", "accounting", "geography",
+                "history", "economics", "life science", "english", "afrikaans",
+                "grade", "marks", "time:", "question", "copyright reserved",
+                "national senior certificate", "basic education", "tourism",
+                "business studies", "information technology",
+            ])
+            if has_third_party and not has_dbe_content:
+                continue   # skip pure ad page
+        except Exception:
+            pass  # if extraction fails, keep the page
+
+        # 1. White out any third-party header at the top
         page.merge_page(wipeout_page)
         # 2. Stamp Laurion footer logo
         page.merge_page(inner_page)

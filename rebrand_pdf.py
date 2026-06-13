@@ -267,22 +267,29 @@ def rebrand_pdf_bytes(pdf_bytes: bytes) -> bytes:
 
     pages = list(reader.pages)
 
-    for page in pages:
-        # Skip ONLY if the page is a pure ad page:
-        # Must contain a third-party marker AND the page must be very short
-        # (ad pages have very little text — typically under 50 words)
+    for i, page in enumerate(pages):
         try:
-            text = page.extract_text() or ""
-            word_count = len(text.split())
-            has_third_party = any(m in text.lower() for m in THIRD_PARTY_MARKERS)
-            if has_third_party and word_count < 50:
-                continue   # skip pure ad page (short page with only branding)
-        except Exception:
-            pass  # if extraction fails, keep the page
+            text = (page.extract_text() or "").strip()
+            text_lower = text.lower()
 
-        # 1. White out any third-party header at the top
+            # Skip previously added Laurion cover page
+            is_laurion_cover = (
+                "laurion" in text_lower and
+                "education made accessible" in text_lower and
+                "you have downloaded" in text_lower
+            )
+            # Skip teachme2 standalone ad page (the one with QR code - has "collected and collated")
+            is_teachme2_standalone = (
+                "collected and collated" in text_lower and
+                any(m in text_lower for m in THIRD_PARTY_MARKERS)
+            )
+            if is_laurion_cover or is_teachme2_standalone:
+                continue
+        except Exception:
+            pass
+
+        # For all kept pages: white out header, stamp footer
         page.merge_page(wipeout_page)
-        # 2. Stamp Laurion footer logo
         page.merge_page(inner_page)
         writer.add_page(page)
 

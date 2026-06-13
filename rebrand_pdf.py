@@ -267,18 +267,9 @@ def rebrand_pdf_bytes(pdf_bytes: bytes) -> bytes:
 
     pages = list(reader.pages)
 
-    # Detect and skip third-party cover pages at the start
-    # (e.g. teachme2 inserts a blank/ad page as page 1)
-    start_index = 0
-    for i, page in enumerate(pages[:3]):   # only check first 3 pages
-        if _is_third_party_cover(page):
-            start_index = i + 1
-        else:
-            break
-
-    # Stamp every content page: wipe third-party header, then add footer logo
-    for page in pages[start_index:]:
-        # 1. White out any third-party header at the top
+    # Stamp every page: wipe any third-party header, then add Laurion footer logo
+    for page in pages:
+        # 1. White out any third-party header at the top (safe on clean DBE papers)
         page.merge_page(wipeout_page)
         # 2. Stamp Laurion footer logo
         page.merge_page(inner_page)

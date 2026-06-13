@@ -268,21 +268,15 @@ def rebrand_pdf_bytes(pdf_bytes: bytes) -> bytes:
     pages = list(reader.pages)
 
     for page in pages:
-        # Skip pure third-party ad pages (e.g. teachme2 "Need an amazing tutor?" page)
-        # These are pages that contain ONLY third-party branding and no exam content.
-        # We detect them by checking: third-party marker present AND no DBE content markers.
+        # Skip ONLY if the page is a pure ad page:
+        # Must contain a third-party marker AND the page must be very short
+        # (ad pages have very little text — typically under 50 words)
         try:
-            text = (page.extract_text() or "").lower()
-            has_third_party = any(m in text for m in THIRD_PARTY_MARKERS)
-            has_dbe_content = any(m in text for m in [
-                "mathematics", "physical science", "accounting", "geography",
-                "history", "economics", "life science", "english", "afrikaans",
-                "grade", "marks", "time:", "question", "copyright reserved",
-                "national senior certificate", "basic education", "tourism",
-                "business studies", "information technology",
-            ])
-            if has_third_party and not has_dbe_content:
-                continue   # skip pure ad page
+            text = page.extract_text() or ""
+            word_count = len(text.split())
+            has_third_party = any(m in text.lower() for m in THIRD_PARTY_MARKERS)
+            if has_third_party and word_count < 50:
+                continue   # skip pure ad page (short page with only branding)
         except Exception:
             pass  # if extraction fails, keep the page
 

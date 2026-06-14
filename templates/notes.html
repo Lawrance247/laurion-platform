@@ -58,11 +58,9 @@
     <!-- SUBJECT + GRADE -->
     <form method="GET" class="notes-topbar">
       <select name="subject">
-        <option value="math"  {% if subject=="math"  %}selected{% endif %}>📊 Mathematics</option>
-        <option value="phy"   {% if subject=="phy"   %}selected{% endif %}>⚛️ Physical Science</option>
-        <option value="ls"    {% if subject=="ls"    %}selected{% endif %}>🌿 Life Science</option>
-        <option value="geo"   {% if subject=="geo"   %}selected{% endif %}>🌍 Geography</option>
-        <option value="acc"   {% if subject=="acc"   %}selected{% endif %}>📈 Accounting</option>
+        {% for code, name in subjects.items() %}
+        <option value="{{ code }}" {% if subject==code %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
       </select>
       <select name="grade">
         {% for g in range(8,13) %}

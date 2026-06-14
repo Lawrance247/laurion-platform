@@ -34,123 +34,74 @@ cloudinary.config(
 # ── ADMIN CONFIG ─────────────────────────────────────────────────────────────
 ADMIN_USERNAME = "LawranceFounder"
 
-# ── CAPS SUBJECTS BY PHASE ────────────────────────────────────────────────
-# Senior Phase: Grades 8–9 (compulsory + common electives)
-SUBJECTS_GR89 = {
-    "eng":   "English Home Language",
-    "afr":   "Afrikaans First Additional Language",
-    "math":  "Mathematics",
-    "ns":    "Natural Sciences",
-    "ss":    "Social Sciences",
-    "ems":   "Economic Management Sciences",
-    "tech":  "Technology",
-    "lo":    "Life Orientation",
-    "ca":    "Creative Arts",
-    "isizulu": "IsiZulu",
-    "isixhosa":"IsiXhosa",
-    "sesotho": "Sesotho",
-    "setswana":"Setswana",
-}
-
-# FET Phase: Grades 10–12
-SUBJECTS_FET = {
-    # Languages (compulsory)
-    "eng":   "English Home And First Additinal Language",
-    "afr":   "Afrikaans First Additional Language",
-    "isizulu": "IsiZulu",
-    "isixhosa":"IsiXhosa",
-    "sesotho": "Sesotho",
-    "setswana":"Setswana",
-    "sepedi":  "Sepedi",
-    "xitsonga":"Xitsonga",
-    "tshivenda":"Tshivenda",
-    "siswati": "Siswati",
-    "isindebele":"IsiNdebele",
-    # Compulsory
-    "lo":    "Life Orientation",
-    # Mathematics stream
-    "math":  "Mathematics",
-    "mlit":  "Mathematical Literacy",
-    "techmath":"Technical Mathematics",
+# ── SUBJECTS — codes match exactly what is stored in the DB ──────────────────
+SUBJECTS = {
+    # Languages — HL = Home Language, FAL = First Additional Language
+    "eng_hl":  "English (HL)",
+    "eng_fal": "English (FAL)",
+    "afr_hl":  "Afrikaans (HL)",
+    "afr_fal": "Afrikaans (FAL)",
+    "zul_hl":  "IsiZulu (HL)",
+    "zul_fal": "IsiZulu (FAL)",
+    "xho_hl":  "IsiXhosa (HL)",
+    "xho_fal": "IsiXhosa (FAL)",
+    "sot_hl":  "Sesotho (HL)",
+    "sot_fal": "Sesotho (FAL)",
+    "sep_hl":  "Sepedi (HL)",
+    "sep_fal": "Sepedi (FAL)",
+    # Mathematics
+    "math":      "Mathematics",
+    "mlit":      "Mathematical Literacy",
+    "tech_math": "Technical Mathematics",
     # Sciences
-    "phy":   "Physical Sciences",
-    "techsci":"Technical Sciences",
-    "ls":    "Life Sciences",
-    "agri":  "Agricultural Sciences",
-    "ms":    "Marine Sciences",
+    "phy":       "Physical Sciences",
+    "ls":        "Life Sciences",
+    "tech_sci":  "Technical Sciences",
+    "agri":      "Agricultural Sciences",
+    "agri_tech": "Agricultural Technology",
     # Commerce
-    "acc":   "Accounting",
-    "bs":    "Business Studies",
-    "econ":  "Economics",
+    "acc":  "Accounting",
+    "bs":   "Business Studies",
+    "econ": "Economics",
     # Humanities
-    "geo":   "Geography",
-    "hist":  "History",
-    "reli":  "Religion Studies",
+    "geo":  "Geography",
+    "hist": "History",
+    "rel":  "Religion Studies",
     # Technology
     "it":    "Information Technology",
     "cat":   "Computer Applications Technology",
-    "egd":   "Engineering Graphics & Design",
-    "mechtech":"Mechanical Technology",
-    "elecserv":"Electrical Technology",
-    "civiltech":"Civil Technology",
-    "agritech":"Agricultural Technology",
+    "egs":   "Electrical Technology",
+    "mech":  "Mechanical Technology",
+    "civil": "Civil Technology",
     # Arts
-    "drama": "Dramatic Arts",
-    "music": "Music",
-    "visart":"Visual Arts",
-    "design":"Design",
-    # Consumer
-    "cons":  "Consumer Studies",
-    "hosp":  "Hospitality Studies",
-    "tour":  "Tourism",
-    # Sport & Physical
-    "sportsc":"Sport & Exercise Science",
+    "drama":   "Dramatic Arts",
+    "music":   "Music",
+    "vis_art": "Visual Arts",
+    "dance":   "Dance Studies",
+    # Life & Consumer
+    "lo":   "Life Orientation",
+    "cons": "Consumer Studies",
+    "hosp": "Hospitality Studies",
+    "tour": "Tourism",
 }
-
-# Combined for general use — FET takes priority, GR89-only subjects appended
-SUBJECTS = {**SUBJECTS_FET, **SUBJECTS_GR89}
-# Simple merge: FET already has all subjects, GR89 adds the phase-specific ones
-# Just use a plain merged dict with no broken dedup logic
-SUBJECTS = dict(SUBJECTS_GR89)
-SUBJECTS.update(SUBJECTS_FET)
 
 SUBJECT_ICONS = {
-    "eng":"🇬🇧", "afr":"🇿🇦", "isizulu":"🗣️", "isixhosa":"🗣️",
-    "sesotho":"🗣️","setswana":"🗣️","sepedi":"🗣️","xitsonga":"🗣️",
-    "tshivenda":"🗣️","siswati":"🗣️","isindebele":"🗣️",
-    "math":"📊","mlit":"📐","techmath":"🔢",
-    "phy":"⚛️","techsci":"🔬","ls":"🌿","agri":"🌾","ms":"🐟",
-    "ns":"🔭","ss":"🌍","ems":"💰","tech":"⚙️",
-    "lo":"🧠","ca":"🎨",
+    "eng_hl":"🇬🇧",  "eng_fal":"🇬🇧",
+    "afr_hl":"🇿🇦",  "afr_fal":"🇿🇦",
+    "zul_hl":"🗣️",   "zul_fal":"🗣️",
+    "xho_hl":"🗣️",   "xho_fal":"🗣️",
+    "sot_hl":"🗣️",   "sot_fal":"🗣️",
+    "sep_hl":"🗣️",   "sep_fal":"🗣️",
+    "math":"📊","mlit":"📐","tech_math":"🔢",
+    "phy":"⚛️","ls":"🌿","tech_sci":"🔬","agri":"🌾","agri_tech":"🚜",
     "acc":"📈","bs":"💼","econ":"💹",
-    "geo":"🗺️","hist":"📜","reli":"✝️",
-    "it":"💻","cat":"🖥️","egd":"📏",
-    "mechtech":"🔧","elecserv":"⚡","civiltech":"🏗️","agritech":"🚜",
-    "drama":"🎭","music":"🎵","visart":"🖌️","design":"✏️",
-    "cons":"🛒","hosp":"🍽️","tour":"✈️",
-    "sportsc":"🏃",
+    "geo":"🗺️","hist":"📜","rel":"✝️",
+    "it":"💻","cat":"🖥️","egs":"⚡","mech":"🔧","civil":"🏗️",
+    "drama":"🎭","music":"🎵","vis_art":"🖌️","dance":"💃",
+    "lo":"🧠","cons":"🛒","hosp":"🍽️","tour":"✈️",
 }
 
-# Per-grade subject availability
-GRADE_SUBJECTS = {
-    8:  ["eng","afr","isizulu","isixhosa","sesotho","setswana","math","ns","ss","ems","tech","lo","ca"],
-    9:  ["eng","afr","isizulu","isixhosa","sesotho","setswana","math","ns","ss","ems","tech","lo","ca"],
-    10: ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele",
-         "lo","math","mlit","techmath","phy","techsci","ls","agri","ms","ns",
-         "acc","bs","econ","geo","hist","reli",
-         "it","cat","egd","mechtech","elecserv","civiltech","agritech",
-         "drama","music","visart","design","cons","hosp","tour","sportsc"],
-    11: ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele",
-         "lo","math","mlit","techmath","phy","techsci","ls","agri","ms",
-         "acc","bs","econ","geo","hist","reli",
-         "it","cat","egd","mechtech","elecserv","civiltech","agritech",
-         "drama","music","visart","design","cons","hosp","tour","sportsc"],
-    12: ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele",
-         "lo","math","mlit","techmath","phy","techsci","ls","agri","ms",
-         "acc","bs","econ","geo","hist","reli",
-         "it","cat","egd","mechtech","elecserv","civiltech","agritech",
-         "drama","music","visart","design","cons","hosp","tour","sportsc"],
-}
+# GRADE_SUBJECTS no longer needed — grade route queries DB directly
 
 # NBT sections — 2 tests: AQL (Academic & Quantitative Literacy) + MAT
 # stored as subject=nbt_aql/nbt_mat, grade=0
@@ -361,19 +312,23 @@ def nbt():
 def grade(grade):
     if grade not in range(8, 13):
         return redirect("/classes")
-    grade_codes = GRADE_SUBJECTS.get(grade, list(SUBJECTS.keys()))
-    grade_subjects = {k: SUBJECTS[k] for k in grade_codes if k in SUBJECTS}
 
-    # Build grouped subjects for the template
+    # Query DB for subjects that actually have materials for this grade
+    available = db.session.query(Material.subject).filter_by(grade=grade).distinct().all()
+    available_codes = {row[0] for row in available}
+    grade_subjects = {k: SUBJECTS[k] for k in available_codes if k in SUBJECTS}
+
+    # Group using DB-matched codes
     GROUP_DEFS = [
-        ("🗣️ Languages",      ["eng","afr","isizulu","isixhosa","sesotho","setswana","sepedi","xitsonga","tshivenda","siswati","isindebele"]),
-        ("📊 Mathematics",    ["math","mlit","techmath"]),
-        ("🔬 Sciences",       ["phy","techsci","ls","ns","agri","ms"]),
-        ("💼 Commerce",       ["acc","bs","econ","ems"]),
-        ("🌍 Humanities",     ["geo","hist","ss","reli"]),
-        ("⚙️ Technology",     ["it","cat","egd","tech","mechtech","elecserv","civiltech","agritech"]),
-        ("🎨 Arts & Culture", ["drama","music","visart","design","ca"]),
-        ("🧠 Life & Consumer",["lo","cons","hosp","tour","sportsc"]),
+        ("🗣️ Languages",      ["eng_hl","eng_fal","afr_hl","afr_fal","zul_hl","zul_fal",
+                               "xho_hl","xho_fal","sot_hl","sot_fal","sep_hl","sep_fal"]),
+        ("📊 Mathematics",    ["math","mlit","tech_math"]),
+        ("🔬 Sciences",       ["phy","ls","tech_sci","agri","agri_tech"]),
+        ("💼 Commerce",       ["acc","bs","econ"]),
+        ("🌍 Humanities",     ["geo","hist","rel"]),
+        ("⚙️ Technology",     ["it","cat","egs","mech","civil"]),
+        ("🎨 Arts & Culture", ["drama","music","vis_art","dance"]),
+        ("🧠 Life & Consumer",["lo","cons","hosp","tour"]),
     ]
     grouped = []
     for gname, codes in GROUP_DEFS:
